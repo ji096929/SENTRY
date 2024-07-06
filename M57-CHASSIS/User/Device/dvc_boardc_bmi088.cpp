@@ -92,10 +92,10 @@ uint8_t Class_BoardC_BMI::BMI088_Init(IMU_Data_t *__BMI088)
         Calibrate_MPU_Offset(__BMI088);
     else
     {
-        __BMI088->GyroOffset[0] = SELF_GxOFFSET;
-        __BMI088->GyroOffset[1] = SELF_GyOFFSET;
-        __BMI088->GyroOffset[2] = SELF_GzOFFSET;
-        __BMI088->gNorm = SELF_gNORM;
+        __BMI088->GyroOffset[0] = GxOFFSET;
+        __BMI088->GyroOffset[1] = GyOFFSET;
+        __BMI088->GyroOffset[2] = GzOFFSET;
+        __BMI088->gNorm = gNORM;
         __BMI088->AccelScale = 9.81f / __BMI088->gNorm;
         __BMI088->TempWhenCali = 40;
     }
@@ -118,10 +118,10 @@ void Class_BoardC_BMI::Calibrate_MPU_Offset(IMU_Data_t *bmi088)
         if (DWT_GetTimeline_s() - startTime > 10)
         {
             // 校准超时
-            bmi088->GyroOffset[0] = SELF_GxOFFSET;
-            bmi088->GyroOffset[1] = SELF_GyOFFSET;
-            bmi088->GyroOffset[2] = SELF_GzOFFSET;
-            bmi088->gNorm = SELF_gNORM;
+            bmi088->GyroOffset[0] = GxOFFSET;
+            bmi088->GyroOffset[1] = GyOFFSET;
+            bmi088->GyroOffset[2] = GzOFFSET;
+            bmi088->gNorm = gNORM;
             bmi088->TempWhenCali = 40;
             break;
         }
@@ -188,15 +188,15 @@ void Class_BoardC_BMI::Calibrate_MPU_Offset(IMU_Data_t *bmi088)
 
             // 数据差异过大认为收到外界干扰，需重新校准
             gNormDiff = gNormMax - gNormMin;
-            for(uint8_t j = 0; j < 3; j++)
+            for (uint8_t j = 0; j < 3; j++)
                 gyroDiff[j] = gyroMax[j] - gyroMin[j];
-           if (gNormDiff > 0.5f ||
-               gyroDiff[0] > 0.15f ||
-               gyroDiff[1] > 0.15f ||
-               gyroDiff[2] > 0.15f)
-               break;
+            if (gNormDiff > 0.5f ||
+                gyroDiff[0] > 0.15f ||
+                gyroDiff[1] > 0.15f ||
+                gyroDiff[2] > 0.15f)
+                break;
             DWT_Delay(0.0005);
-            }
+        }
 
         // 取平均值得到标定结果
         bmi088->gNorm /= (float)CaliTimes;
@@ -230,7 +230,7 @@ uint8_t Class_BoardC_BMI::BMI088_Accel_Init(void)
     uint8_t res = 0;
     uint8_t write_reg_num = 0;
 
-    //check communication
+    //check commiunication
     BMI088_accel_read_single_reg(BMI088_ACC_CHIP_ID, &res);
     Delay_Us(BMI088_COM_WAIT_SENSOR_TIME);
     BMI088_accel_read_single_reg(BMI088_ACC_CHIP_ID, &res);
@@ -240,7 +240,7 @@ uint8_t Class_BoardC_BMI::BMI088_Accel_Init(void)
     BMI088_accel_write_single_reg(BMI088_ACC_SOFTRESET, BMI088_ACC_SOFTRESET_VALUE);
     Delay_Ms(BMI088_LONG_DELAY_TIME);
 
-    //check communication is normal after reset
+    //check commiunication is normal after reset
     BMI088_accel_read_single_reg(BMI088_ACC_CHIP_ID, &res);
     Delay_Us(BMI088_COM_WAIT_SENSOR_TIME);
     BMI088_accel_read_single_reg(BMI088_ACC_CHIP_ID, &res);
@@ -333,6 +333,7 @@ uint8_t Class_BoardC_BMI::bmi088_accel_self_test(void)
             {BMI088_ACC_PWR_CONF, BMI088_ACC_PWR_ACTIVE_MODE, BMI088_ACC_PWR_CONF_ERROR},
             {BMI088_ACC_SELF_TEST, BMI088_ACC_SELF_TEST_POSITIVE_SIGNAL, BMI088_ACC_PWR_CONF_ERROR},
             {BMI088_ACC_SELF_TEST, BMI088_ACC_SELF_TEST_NEGATIVE_SIGNAL, BMI088_ACC_PWR_CONF_ERROR}
+
         };
 
     //check commiunication is normal
@@ -636,6 +637,7 @@ void Class_BoardC_BMI::Delay_Init(void)
 {
     fac_us = SystemCoreClock / 1000000;
     fac_ms = SystemCoreClock / 1000;
+
 }
 
 void Class_BoardC_BMI::Delay_Us(uint16_t nus)

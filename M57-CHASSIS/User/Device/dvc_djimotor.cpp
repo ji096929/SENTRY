@@ -203,27 +203,37 @@ void Class_DJI_Motor_GM6020::Data_Process()
     Math_Endian_Reverse_16((void *)&tmp_buffer->Temperature, (void *)&tmp_temperature);
 
     //计算圈数与总编码器值
-    delta_encoder = tmp_encoder - Data.Pre_Encoder;
-    if (delta_encoder < -Encoder_Num_Per_Round / 2)
+    if(Start_Falg==1)
     {
-        //正方向转过了一圈
-        Data.Total_Round++;
-    }
-    else if (delta_encoder > Encoder_Num_Per_Round / 2)
-    {
-        //反方向转过了一圈
-        Data.Total_Round--;
+        delta_encoder = tmp_encoder - Data.Pre_Encoder;
+        if (delta_encoder < -Encoder_Num_Per_Round / 2)
+        {
+            //正方向转过了一圈
+            Data.Total_Round++;
+        }
+        else if (delta_encoder > Encoder_Num_Per_Round / 2)
+        {
+            //反方向转过了一圈
+            Data.Total_Round--;
+        }        
     }
     Data.Total_Encoder = Data.Total_Round * Encoder_Num_Per_Round + tmp_encoder + Encoder_Offset;
 
     //计算电机本身信息
-    Data.Now_Angle = (float)Data.Total_Encoder / (float)Encoder_Num_Per_Round * 2.0f * PI;
-    Data.Now_Omega = (float)tmp_omega * RPM_TO_RADPS;
+    // Data.Now_Angle = (float)Data.Total_Encoder / (float)Encoder_Num_Per_Round * 360.0f;
+    // Data.Now_Radian = (float)Data.Total_Encoder / (float)Encoder_Num_Per_Round * 2.0f * PI;
+    Data.Now_Angle = (float)tmp_encoder / (float)Encoder_Num_Per_Round * 360.0f;
+    Data.Now_Radian = (float)tmp_encoder / (float)Encoder_Num_Per_Round * 2.0f * PI;
+    // Data.Now_Omega_Angle = (float)(Data.Total_Encoder - Data.Pre_Total_Encoder)/8191.0f*60.0f*1000.0f;  //rpm
+    Data.Now_Omega_Radian = (float)tmp_omega * RPM_TO_RADPS;
+    Data.Now_Omega_Angle = (float)tmp_omega * RPM_TO_DEG;  
     Data.Now_Torque = tmp_torque;
     Data.Now_Temperature = tmp_temperature + CELSIUS_TO_KELVIN;
 
     //存储预备信息
     Data.Pre_Encoder = tmp_encoder;
+    Data.Pre_Total_Encoder = Data.Total_Encoder;
+    if(Start_Falg==0)  Start_Falg = 1;
 }
 
 /**
@@ -283,7 +293,7 @@ void Class_DJI_Motor_GM6020::TIM_PID_PeriodElapsedCallback()
     case (DJI_Motor_Control_Method_OPENLOOP):
     {
         //默认开环速度控制
-        Out = Target_Omega / Omega_Max * Output_Max;
+        Out = Target_Torque / Omega_Max * Output_Max;
     }
     break;
     case (DJI_Motor_Control_Method_TORQUE):
@@ -297,8 +307,8 @@ void Class_DJI_Motor_GM6020::TIM_PID_PeriodElapsedCallback()
     break;
     case (DJI_Motor_Control_Method_OMEGA):
     {
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Data.Now_Omega);
+        PID_Omega.Set_Target(Target_Omega_Angle);
+        PID_Omega.Set_Now(Data.Now_Omega_Angle);
         PID_Omega.TIM_Adjust_PeriodElapsedCallback();
 
         Target_Torque = PID_Omega.Get_Out();
@@ -316,10 +326,10 @@ void Class_DJI_Motor_GM6020::TIM_PID_PeriodElapsedCallback()
         PID_Angle.Set_Now(Data.Now_Angle);
         PID_Angle.TIM_Adjust_PeriodElapsedCallback();
 
-        Target_Omega = PID_Angle.Get_Out();
+        Target_Omega_Angle = PID_Angle.Get_Out();
 
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Data.Now_Omega);
+        PID_Omega.Set_Target(Target_Omega_Angle);
+        PID_Omega.Set_Now(Data.Now_Omega_Angle);
         PID_Omega.TIM_Adjust_PeriodElapsedCallback();
 
         Target_Torque = PID_Omega.Get_Out();
@@ -385,27 +395,33 @@ void Class_DJI_Motor_C610::Data_Process()
     Math_Endian_Reverse_16((void *)&tmp_buffer->Temperature, (void *)&tmp_temperature);
 
     //计算圈数与总编码器值
-    delta_encoder = tmp_encoder - Data.Pre_Encoder;
-    if (delta_encoder < -Encoder_Num_Per_Round / 2)
+    if(Start_Falg==1)
     {
-        //正方向转过了一圈
-        Data.Total_Round++;
-    }
-    else if (delta_encoder > Encoder_Num_Per_Round / 2)
-    {
-        //反方向转过了一圈
-        Data.Total_Round--;
+        delta_encoder = tmp_encoder - Data.Pre_Encoder;
+        if (delta_encoder < -Encoder_Num_Per_Round / 2)
+        {
+            //正方向转过了一圈
+            Data.Total_Round++;
+        }
+        else if (delta_encoder > Encoder_Num_Per_Round / 2)
+        {
+            //反方向转过了一圈
+            Data.Total_Round--;
+        }        
     }
     Data.Total_Encoder = Data.Total_Round * Encoder_Num_Per_Round + tmp_encoder;
 
     //计算电机本身信息
-    Data.Now_Angle = (float)Data.Total_Encoder / (float)Encoder_Num_Per_Round * 2.0f * PI / Gearbox_Rate;
-    Data.Now_Omega = (float)tmp_omega * RPM_TO_RADPS / Gearbox_Rate;
+    Data.Now_Angle = (float)Data.Total_Encoder / (float)Encoder_Num_Per_Round *360.f / Gearbox_Rate;
+    Data.Now_Radian = (float)Data.Total_Encoder / (float)Encoder_Num_Per_Round * 2.0f * PI  / Gearbox_Rate;
+    Data.Now_Omega_Radian = (float)tmp_omega * RPM_TO_RADPS / Gearbox_Rate;
+    Data.Now_Omega_Angle = (float)tmp_omega * RPM_TO_DEG / Gearbox_Rate;
     Data.Now_Torque = tmp_torque;
     Data.Now_Temperature = tmp_temperature + CELSIUS_TO_KELVIN;
 
     //存储预备信息
     Data.Pre_Encoder = tmp_encoder;
+    if(Start_Falg==0)  Start_Falg = 1;
 }
 
 /**
@@ -475,8 +491,8 @@ void Class_DJI_Motor_C610::TIM_PID_PeriodElapsedCallback()
     break;
     case (DJI_Motor_Control_Method_OMEGA):
     {
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Data.Now_Omega);
+        PID_Omega.Set_Target(Target_Omega_Radian);
+        PID_Omega.Set_Now(Data.Now_Omega_Radian);
         PID_Omega.TIM_Adjust_PeriodElapsedCallback();
 
         Out = PID_Omega.Get_Out();
@@ -484,14 +500,14 @@ void Class_DJI_Motor_C610::TIM_PID_PeriodElapsedCallback()
     break;
     case (DJI_Motor_Control_Method_ANGLE):
     {
-        PID_Angle.Set_Target(Target_Angle);
-        PID_Angle.Set_Now(Data.Now_Angle);
+        PID_Angle.Set_Target(Target_Radian);
+        PID_Angle.Set_Now(Data.Now_Radian);
         PID_Angle.TIM_Adjust_PeriodElapsedCallback();
 
-        Target_Omega = PID_Angle.Get_Out();
+        Target_Omega_Radian = PID_Angle.Get_Out();
 
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Data.Now_Omega);
+        PID_Omega.Set_Target(Target_Omega_Radian);
+        PID_Omega.Set_Now(Data.Now_Omega_Radian);
         PID_Omega.TIM_Adjust_PeriodElapsedCallback();
 
         Out = PID_Omega.Get_Out();
@@ -551,27 +567,33 @@ void Class_DJI_Motor_C620::Data_Process()
     Math_Endian_Reverse_16((void *)&tmp_buffer->Temperature, (void *)&tmp_temperature);
 
     //计算圈数与总编码器值
-    delta_encoder = tmp_encoder - Data.Pre_Encoder;
-    if (delta_encoder < -Encoder_Num_Per_Round / 2)
+    if(Start_Falg==1)
     {
-        //正方向转过了一圈
-        Data.Total_Round++;
-    }
-    else if (delta_encoder > Encoder_Num_Per_Round / 2)
-    {
-        //反方向转过了一圈
-        Data.Total_Round--;
+        delta_encoder = tmp_encoder - Data.Pre_Encoder;
+        if (delta_encoder < -Encoder_Num_Per_Round / 2)
+        {
+            //正方向转过了一圈
+            Data.Total_Round++;
+        }
+        else if (delta_encoder > Encoder_Num_Per_Round / 2)
+        {
+            //反方向转过了一圈
+            Data.Total_Round--;
+        }        
     }
     Data.Total_Encoder = Data.Total_Round * Encoder_Num_Per_Round + tmp_encoder;
 
     //计算电机本身信息
-    Data.Now_Angle = (float)Data.Total_Encoder / (float)Encoder_Num_Per_Round * 2.0f * PI / Gearbox_Rate;
-    Data.Now_Omega = (float)tmp_omega * RPM_TO_RADPS / Gearbox_Rate;
+    Data.Now_Radian = (float)Data.Total_Encoder / (float)Encoder_Num_Per_Round * 2.0f * PI / Gearbox_Rate;
+    Data.Now_Angle = (float)Data.Total_Encoder / (float)Encoder_Num_Per_Round * 360.f / Gearbox_Rate;
+    Data.Now_Omega_Radian = (float)tmp_omega * RPM_TO_RADPS / Gearbox_Rate;
+    Data.Now_Omega_Angle = (float)tmp_omega * RPM_TO_DEG / Gearbox_Rate;
     Data.Now_Torque = tmp_torque;
     Data.Now_Temperature = tmp_temperature + CELSIUS_TO_KELVIN;
 
     //存储预备信息
     Data.Pre_Encoder = tmp_encoder;
+    if(Start_Falg==0)  Start_Falg = 1;
 }
 
 /**
@@ -641,8 +663,8 @@ void Class_DJI_Motor_C620::TIM_PID_PeriodElapsedCallback()
     break;
     case (DJI_Motor_Control_Method_OMEGA):
     {
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Data.Now_Omega);
+        PID_Omega.Set_Target(Target_Omega_Radian);
+        PID_Omega.Set_Now(Data.Now_Omega_Radian);
         PID_Omega.TIM_Adjust_PeriodElapsedCallback();
 
         Out = PID_Omega.Get_Out();
@@ -650,14 +672,14 @@ void Class_DJI_Motor_C620::TIM_PID_PeriodElapsedCallback()
     break;
     case (DJI_Motor_Control_Method_ANGLE):
     {
-        PID_Angle.Set_Target(Target_Angle);
-        PID_Angle.Set_Now(Data.Now_Angle);
+        PID_Angle.Set_Target(Target_Radian);
+        PID_Angle.Set_Now(Data.Now_Radian);
         PID_Angle.TIM_Adjust_PeriodElapsedCallback();
 
-        Target_Omega = PID_Angle.Get_Out();
+        Target_Omega_Radian = PID_Angle.Get_Out();
 
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Data.Now_Omega);
+        PID_Omega.Set_Target(Target_Omega_Radian);
+        PID_Omega.Set_Now(Data.Now_Omega_Radian);
         PID_Omega.TIM_Adjust_PeriodElapsedCallback();
 
         Out = PID_Omega.Get_Out();

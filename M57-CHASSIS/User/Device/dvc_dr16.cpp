@@ -28,40 +28,59 @@
  *
  * @param huart 指定的UART
  */
-void Class_DR16::Init(UART_HandleTypeDef *huart)
+void Class_DR16::Init(UART_HandleTypeDef *huart_1,UART_HandleTypeDef *huart_2)
 {
-    if (huart->Instance == USART1)
+    //dr16串口
+    if (huart_1->Instance == USART1)
     {
-        UART_Manage_Object = &UART1_Manage_Object;
+        UART_Manage_Object_1 = &UART1_Manage_Object;
     }
-    else if (huart->Instance == USART2)
+    else if (huart_1->Instance == USART2)
     {
-        UART_Manage_Object = &UART2_Manage_Object;
+        UART_Manage_Object_1 = &UART2_Manage_Object;
     }
-    else if (huart->Instance == USART3)
+    else if (huart_1->Instance == USART3)
     {
-        UART_Manage_Object = &UART3_Manage_Object;
+        UART_Manage_Object_1 = &UART3_Manage_Object;
     }
-    else if (huart->Instance == UART4)
+    else if (huart_1->Instance == UART4)
     {
-        UART_Manage_Object = &UART4_Manage_Object;
+        UART_Manage_Object_1 = &UART4_Manage_Object;
     }
-    else if (huart->Instance == UART5)
+    else if (huart_1->Instance == UART5)
     {
-        UART_Manage_Object = &UART5_Manage_Object;
+        UART_Manage_Object_1 = &UART5_Manage_Object;
     }
-    else if (huart->Instance == USART6)
+    else if (huart_1->Instance == USART6)
     {
-        UART_Manage_Object = &UART6_Manage_Object;
+        UART_Manage_Object_1 = &UART6_Manage_Object;
     }
-//    else if (huart->Instance == UART7)
-//    {
-//        UART_Manage_Object = &UART7_Manage_Object;
-//    }
-//    else if (huart->Instance == UART8)
-//    {
-//        UART_Manage_Object = &UART8_Manage_Object;
-//    }
+
+    //图传串口
+    if (huart_2->Instance == USART1)
+    {
+        UART_Manage_Object_2 = &UART1_Manage_Object;
+    }
+    else if (huart_2->Instance == USART2)
+    {
+        UART_Manage_Object_2 = &UART2_Manage_Object;
+    }
+    else if (huart_2->Instance == USART3)
+    {
+        UART_Manage_Object_2 = &UART3_Manage_Object;
+    }
+    else if (huart_2->Instance == UART4)
+    {
+        UART_Manage_Object_2 = &UART4_Manage_Object;
+    }
+    else if (huart_2->Instance == UART5)
+    {
+        UART_Manage_Object_2 = &UART5_Manage_Object;
+    }
+    else if (huart_2->Instance == USART6)
+    {
+        UART_Manage_Object_2 = &UART6_Manage_Object;
+    }
 }
 
 /**
@@ -207,16 +226,17 @@ void Class_DR16::Judge_Updata(Struct_DR16_UART_Data Pre_UART_Rx_Data,Struct_DR16
     }
 }
 
+
 /**
  * @brief 数据处理过程
  *
  */
-void Class_DR16::Data_Process()
+void Class_DR16::DR16_Data_Process()
 {
     //获取当前原始值数据
-    memcpy(&Now_UART_Rx_Data, UART_Manage_Object->Rx_Buffer, 18 * sizeof(uint8_t));
+    memcpy(&Now_UART_Rx_Data, UART_Manage_Object_1->Rx_Buffer,sizeof(Struct_DR16_UART_Data));
     //数据处理过程
-    Struct_DR16_UART_Data *tmp_buffer = (Struct_DR16_UART_Data *)UART_Manage_Object->Rx_Buffer;
+    Struct_DR16_UART_Data *tmp_buffer = (Struct_DR16_UART_Data *)UART_Manage_Object_1->Rx_Buffer;
 
     /*源数据转为对外数据*/
 
@@ -230,20 +250,20 @@ void Class_DR16::Data_Process()
     Judge_Switch(&Data.Left_Switch, tmp_buffer->Switch_1, Pre_UART_Rx_Data.Switch_1);
     Judge_Switch(&Data.Right_Switch, tmp_buffer->Switch_2, Pre_UART_Rx_Data.Switch_2);
 
-    //鼠标信息
-    Data.Mouse_X = tmp_buffer->Mouse_X / 32768.0f;
-    Data.Mouse_Y = tmp_buffer->Mouse_Y / 32768.0f;
-    Data.Mouse_Z = tmp_buffer->Mouse_Z / 32768.0f;
+    // //鼠标信息
+    // Data.Mouse_X = tmp_buffer->Mouse_X / 32768.0f;
+    // Data.Mouse_Y = tmp_buffer->Mouse_Y / 32768.0f;
+    // Data.Mouse_Z = tmp_buffer->Mouse_Z / 32768.0f;
 
-    //判断鼠标触发
-    Judge_Key(&Data.Mouse_Left_Key, tmp_buffer->Mouse_Left_Key, Pre_UART_Rx_Data.Mouse_Left_Key);
-    Judge_Key(&Data.Mouse_Right_Key, tmp_buffer->Mouse_Right_Key, Pre_UART_Rx_Data.Mouse_Right_Key);
+    // //判断鼠标触发
+    // Judge_Key(&Data.Mouse_Left_Key, tmp_buffer->Mouse_Left_Key, Pre_UART_Rx_Data.Mouse_Left_Key);
+    // Judge_Key(&Data.Mouse_Right_Key, tmp_buffer->Mouse_Right_Key, Pre_UART_Rx_Data.Mouse_Right_Key);
 
-    //判断键盘触发
-    for (int i = 0; i < 16; i++)
-    {
-        Judge_Key(&Data.Keyboard_Key[i], ((tmp_buffer->Keyboard_Key) >> i) & 0x1, ((Pre_UART_Rx_Data.Keyboard_Key) >> i) & 0x1);
-    }
+    // //判断键盘触发
+    // for (int i = 0; i < 16; i++)
+    // {
+    //     Judge_Key(&Data.Keyboard_Key[i], ((tmp_buffer->Keyboard_Key) >> i) & 0x1, ((Pre_UART_Rx_Data.Keyboard_Key) >> i) & 0x1);
+    // }
 
     //左前轮信息
     Data.Yaw = (tmp_buffer->Channel_Yaw - Rocker_Offset) / Rocker_Num;
@@ -252,19 +272,76 @@ void Class_DR16::Data_Process()
 }
 
 /**
+ * @brief 数据处理过程
+ *
+ */
+void Class_DR16::Image_Data_Process(uint8_t* __rx_buffer)
+{
+    //获取当前原始值数据
+    memcpy(&Now_UART_Image_Rx_Data, __rx_buffer,sizeof(Struct_Image_UART_Data));
+    //数据处理过程
+    Struct_Image_UART_Data *tmp_buffer = (Struct_Image_UART_Data *)__rx_buffer;
+
+    /*源数据转为对外数据*/
+
+    //鼠标信息
+    Data.Mouse_X = tmp_buffer->Mouse_X / 32768.0f;
+    Data.Mouse_Y = tmp_buffer->Mouse_Y / 32768.0f;
+    Data.Mouse_Z = tmp_buffer->Mouse_Z / 32768.0f;
+
+
+    //判断鼠标触发
+    Judge_Key(&Data.Mouse_Left_Key, tmp_buffer->Mouse_Left_Key, Pre_UART_Image_Rx_Data.Mouse_Left_Key);
+    Judge_Key(&Data.Mouse_Right_Key, tmp_buffer->Mouse_Right_Key, Pre_UART_Image_Rx_Data.Mouse_Right_Key);
+
+    //判断键盘触发
+    for (int i = 0; i < 16; i++)
+    {
+        Judge_Key(&Data.Keyboard_Key[i], ((tmp_buffer->Keyboard_Key) >> i) & 0x1, ((Pre_UART_Image_Rx_Data.Keyboard_Key) >> i) & 0x1);
+    }
+}
+
+/**
  * @brief UART通信接收回调函数
  *
  * @param Rx_Data 接收的数据
  */
-void Class_DR16::UART_RxCpltCallback(uint8_t *Rx_Data)
+void Class_DR16::DR16_UART_RxCpltCallback(uint8_t *Rx_Data)
 {
     //滑动窗口, 判断遥控器是否在线
-    Flag += 1;
+    DR16_Flag += 1;
 
-    Data_Process();
+    DR16_Data_Process();
 
     //保留上一次数据
-    memcpy(&Pre_UART_Rx_Data, UART_Manage_Object->Rx_Buffer, 18 * sizeof(uint8_t));
+    memcpy(&Pre_UART_Rx_Data, UART_Manage_Object_1->Rx_Buffer, sizeof(Struct_DR16_UART_Data));
+}
+
+/**
+ * @brief UART通信接收回调函数
+ *
+ * @param Rx_Data 接收的数据
+ */
+
+void Class_DR16::Image_UART_RxCpltCallback(uint8_t *Rx_Data)
+{
+    if(Rx_Data[0]==0xA5)
+    {
+        uint16_t cmd_id,data_length;
+        //数据处理过程
+        cmd_id=(Rx_Data[6])&0xff;
+        cmd_id=(cmd_id<<8)|Rx_Data[5];  
+        data_length=Rx_Data[2]&0xff;
+        data_length=(data_length<<8)|Rx_Data[1];
+        if(cmd_id == 0x0304 && data_length == 12)
+        {
+            //滑动窗口, 判断遥控器是否在线
+            Image_Flag += 1;
+            Image_Data_Process(&Rx_Data[7]);
+            //保留上一次数据
+            memcpy(&Pre_UART_Image_Rx_Data, &Rx_Data[7], sizeof(Struct_Image_UART_Data));            
+        }
+    }
 }
 
 /**
@@ -273,25 +350,20 @@ void Class_DR16::UART_RxCpltCallback(uint8_t *Rx_Data)
  */
 void Class_DR16::TIM1msMod50_Alive_PeriodElapsedCallback()
 {
-    // 判断该时间段内是否接收过遥控器数据
-    if (Flag == Pre_Flag)
+    //判断该时间段内是否接收过遥控器数据
+    if (DR16_Flag == Pre_DR16_Flag && Image_Flag == Pre_Image_Flag)
     {
-        // 遥控器断开连接
+        //遥控器断开连接
         DR16_Status = DR16_Status_DISABLE;
-        // 遥控器中途断联导致错误，重启 DMA
-        if (huart3.ErrorCode)
-        {
-            HAL_UART_DMAStop(&huart3); // 停止以重启
-            // HAL_Delay(10); // 等待错误结束
-            HAL_UARTEx_ReceiveToIdle_DMA(&huart3, UART3_Manage_Object.Rx_Buffer, UART3_Manage_Object.Rx_Buffer_Length);
-        }
+        Unline_Cnt++;
     }
     else
     {
-        // 遥控器保持连接
+        //遥控器保持连接
         DR16_Status = DR16_Status_ENABLE;
     }
-    Pre_Flag = Flag;
+    Pre_DR16_Flag = DR16_Flag;
+    Pre_Image_Flag = Image_Flag;
 }
 
 /************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/

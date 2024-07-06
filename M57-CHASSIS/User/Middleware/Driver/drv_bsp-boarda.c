@@ -406,10 +406,7 @@
 /**
  * @brief 设定蜂鸣器
  *
- * @param Rate
-
-
- 蜂鸣器响度占空比
+ * @param Rate 蜂鸣器响度占空比
  */
 //void BSP_Set_PWM_Buzzer(float Rate)
 //{

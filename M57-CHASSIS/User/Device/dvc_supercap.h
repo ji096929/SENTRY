@@ -37,19 +37,20 @@ enum Enum_Supercap_Status
  */
 struct Struct_Supercap_CAN_Data
 {
-    int16_t Stored_Energy_Reverse;
-    int16_t Now_Power_Reverse;
+    float Supercap_Voltage;
+    float Stored_Energy;
 } __attribute__((packed));
 
 /**
- * @brief 超级电容经过处理的数据
+ * @brief 超级电容发送的数据
  *
  */
-struct Struct_Supercap_Data
+struct Struct_Supercap_Tx_Data
 {
-    float Stored_Energy;
+    float Limit_Power;
     float Now_Power;
-};
+    uint16_t Chassis_Power;
+}__attribute__((packed));
 
 /**
  * @brief Specialized, 超级电容
@@ -58,12 +59,12 @@ struct Struct_Supercap_Data
 class Class_Supercap
 {
 public:
-    void Init(CAN_HandleTypeDef *__hcan, uint16_t __CAN_ID = 0x210, float __Limit_Power_Max = 0);
+    void Init(CAN_HandleTypeDef *__hcan, float __Limit_Power_Max = 45);
     void Init_UART(UART_HandleTypeDef *__huart, uint8_t __fame_header = '*', uint8_t __fame_tail = ';', float __Limit_Power_Max = 45.0f);
 
     inline Enum_Supercap_Status Get_Supercap_Status();
     inline float Get_Stored_Energy();
-    inline float Get_Now_Power();
+    inline float Get_Now_Voltage();
 
     inline void Set_Limit_Power(float __Limit_Power);
     inline void Set_Now_Power(float __Now_Power);
@@ -72,7 +73,9 @@ public:
     void UART_RxCpltCallback(uint8_t *Rx_Data);
 
     void TIM_Alive_PeriodElapsedCallback();
-    void TIM_UART_PeriodElapsedCallback();
+
+    void TIM_UART_Tx_PeriodElapsedCallback();
+    void TIM_Supercap_PeriodElapsedCallback();
 
 protected:
     //初始化相关常量
@@ -83,8 +86,6 @@ protected:
     uint16_t CAN_ID;
     //发送缓存区
     uint8_t *CAN_Tx_Data;
-    //绝对最大限制功率, 0表示不限制
-    float Limit_Power_Max;
 
     //串口模式
     Struct_UART_Manage_Object *UART_Manage_Object;
@@ -104,7 +105,10 @@ protected:
     //超级电容状态
     Enum_Supercap_Status Supercap_Status = Supercap_Status_DISABLE;
     //超级电容对外接口信息
-    Struct_Supercap_Data Supercap_Data;
+    Struct_Supercap_CAN_Data Supercap_Data;
+
+    //写变量
+    Struct_Supercap_Tx_Data Supercap_Tx_Data;
 
     //写变量
 
@@ -116,9 +120,9 @@ protected:
     //内部函数
 
     void Data_Process();
-    void Data_Process_UART();
-
     void Output();
+
+    void Data_Process_UART();
     void Output_UART();
 };
 
@@ -146,15 +150,26 @@ float Class_Supercap::Get_Stored_Energy()
     return (Supercap_Data.Stored_Energy);
 }
 
+// /**
+//  * @brief 获取输出的功率
+//  *
+//  * @return float 输出的功率
+//  */
+// float Class_Supercap::Get_Now_Power()
+// {
+//     return (Supercap_Data.Now_Power);
+// }
+
 /**
- * @brief 获取输出的功率
+ * @brief 获取当前的电压
  *
- * @return float 输出的功率
+ * @return float 当前的电压
  */
-float Class_Supercap::Get_Now_Power()
+float Class_Supercap::Get_Now_Voltage()
 {
-    return (Supercap_Data.Now_Power);
+    return (Supercap_Data.Supercap_Voltage);
 }
+
 /**
  * @brief 设置底盘当前的功率
  *
@@ -162,7 +177,7 @@ float Class_Supercap::Get_Now_Power()
  */
 void Class_Supercap::Set_Now_Power(float __Now_Power)
 {
-    Supercap_Data.Now_Power = __Now_Power;
+    Supercap_Tx_Data.Now_Power = __Now_Power;
 }
 
 /**
@@ -172,7 +187,7 @@ void Class_Supercap::Set_Now_Power(float __Now_Power)
  */
 void Class_Supercap::Set_Limit_Power(float __Limit_Power)
 {
-    Limit_Power = __Limit_Power;
+    Supercap_Tx_Data.Limit_Power = __Limit_Power;
 }
 
 #endif

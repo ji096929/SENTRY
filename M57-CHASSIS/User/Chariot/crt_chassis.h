@@ -25,15 +25,22 @@
 #include "dvc_referee.h"
 #include "dvc_djimotor.h"
 #include "alg_power_limit.h"
-
+#include "dvc_supercap.h"
+#include "config.h"
 /* Exported macros -----------------------------------------------------------*/
 
 /* Exported types ------------------------------------------------------------*/
-typedef enum
+
+/**
+ * @brief 底盘冲刺状态枚举
+ *
+ */
+enum Enum_Sprint_Status : uint8_t
 {
-    FOLLOW_ON = 0x01,
-    FOLLOW_OFF = 0x00,
-} Enum_FOLLOW_FLAG_E;
+    Sprint_Status_DISABLE = 0, 
+    Sprint_Status_ENABLE,
+};
+
 
 /**
  * @brief 底盘控制类型
@@ -41,13 +48,9 @@ typedef enum
  */
 enum Enum_Chassis_Control_Type :uint8_t
 {
-    Chassis_Control_Type_FLLOW      = 1,
-    Chassis_Control_Type_SPIN       = 2,
-    Chassis_Control_Type_OPPO_SPIN  = 3,
-    Chassis_Control_Type_DISABLE    = 4,
-    Chassis_Control_Type_NORMAL     = 5,
-    Chassis_Control_Type_NORMAL_SPIN= 6,
-    Chassis_Control_Type_FOLLOW_SPIN= 7,
+    Chassis_Control_Type_DISABLE = 0,
+    Chassis_Control_Type_FLLOW,
+    Chassis_Control_Type_SPIN,
 };
 
 /**
@@ -66,17 +69,21 @@ public:
     //斜坡函数加减速角速度
     Class_Slope Slope_Omega;
 
+    Class_Supercap Supercap;
+    #ifdef POWER_LIMIT
+    
     //功率限制
     Class_Power_Limit Power_Limit;
-
+    
+    
+    #endif
     //裁判系统
     Class_Referee *Referee;
 
     //下方转动电机
     Class_DJI_Motor_C620 Motor_Wheel[4];
 
-
-    void Init(float __Velocity_X_Max = 4.0f, float __Velocity_Y_Max = 4.0f, float __Omega_Max = 4.0f, float __Steer_Power_Ratio = 0.5);
+    void Init(float __Velocity_X_Max = 4.0f, float __Velocity_Y_Max = 4.0f, float __Omega_Max = 8.0f, float __Steer_Power_Ratio = 0.5);
 
     inline Enum_Chassis_Control_Type Get_Chassis_Control_Type();
     inline float Get_Velocity_X_Max();
@@ -103,7 +110,7 @@ public:
     inline void Set_Velocity_Y_Max(float __Velocity_Y_Max);
     inline void Set_Velocity_X_Max(float __Velocity_X_Max);
 
-    void TIM_Calculate_PeriodElapsedCallback();
+    void TIM_Calculate_PeriodElapsedCallback(Enum_Sprint_Status __Sprint_Status);
 
 protected:
     //初始化相关常量
@@ -117,7 +124,7 @@ protected:
     //舵向电机功率上限比率
     float Steer_Power_Ratio = 0.5f;
     //底盘小陀螺模式角速度
-    float Spin_Omega = 5.0f;
+    float Spin_Omega = 4.0f;
     //常量
 
     //电机理论上最大输出
@@ -150,8 +157,7 @@ protected:
 
     //底盘控制方法
     Enum_Chassis_Control_Type Chassis_Control_Type = Chassis_Control_Type_DISABLE;
-    Enum_FOLLOW_FLAG_E FOLLOW_FLAG = FOLLOW_ON;
-    // 目标速度X
+    //目标速度X
     float Target_Velocity_X = 0.0f;
     //目标速度Y
     float Target_Velocity_Y = 0.0f;
@@ -165,10 +171,6 @@ protected:
     float Now_Omega = 0.0f;
 
     //内部函数
-
-    // void Power_Limit_Steer();
-    // void Power_Limit_Wheel();
-    // void Power_Limit();
     void Speed_Resolution();
 };
 
@@ -194,14 +196,14 @@ const float FRONT_TO_FRONT_CENTER_DISTANCE = 0.176f;
 //轮组方位角
 const float WHEEL_AZIMUTH[3] = {0.0f, atan2f(-FRONT_TO_FRONT_CENTER_DISTANCE, -FRONT_CENTER_TO_CORE_DISTANCE), atan2f(FRONT_TO_FRONT_CENTER_DISTANCE, -FRONT_CENTER_TO_CORE_DISTANCE)};
 
-//轮子直径
-const float WHELL_DIAMETER = 13.200000f;	
+//轮子直径 单位m
+const float WHELL_DIAMETER = 0.13f;	
 
-//底盘半宽
-const float HALF_WIDTH = 0.15000000f;		
+//底盘半宽 单位m
+const float HALF_WIDTH = 0.15f;		
 
-//底盘半长
-const float HALF_LENGTH = 0.15000000f;	
+//底盘半长 单位m
+const float HALF_LENGTH = 0.15f;	
 
 //转速转角速度	1 rpm = 2pi/60 rad/s 
 const float RPM2RAD = 0.104720f;				
@@ -211,6 +213,9 @@ const float RPM2VEL = 0.806342f;
 
 //线速度转转度  //1.240168							
 const float VEL2RPM = 1.240168f;				
+
+//线速度转角速度 rad/s
+const float VEL2RAD = 1.0f/(WHELL_DIAMETER/2.0f);
 
 //齿轮箱减速比;	
 const float M3508_REDUCTION_RATIO = 13.733f;	

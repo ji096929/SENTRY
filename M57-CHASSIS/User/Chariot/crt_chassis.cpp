@@ -42,22 +42,22 @@ void Class_Tricycle_Chassis::Init(float __Velocity_X_Max, float __Velocity_Y_Max
     Omega_Max = __Omega_Max;
     Steer_Power_Ratio = __Steer_Power_Ratio;
 
-
-    //斜坡函数加减速速度X  0.005f, 0.01f
-    Slope_Velocity_X.Init(0.25f,1.0f);
-    //斜坡函数加减速速度Y  0.005f, 0.01f
-    Slope_Velocity_Y.Init(0.25f,1.0f);
+    //斜坡函数加减速速度X  控制周期1ms
+    Slope_Velocity_X.Init(0.004f,0.008f);
+    //斜坡函数加减速速度Y  控制周期1ms
+    Slope_Velocity_Y.Init(0.004f,0.008f);
     //斜坡函数加减速角速度
     Slope_Omega.Init(0.05f, 0.05f);
 
-    //功率限制参数初始化
-    Power_Limit.Parameter_Init();
-
+    #ifdef POWER_LIMIT
+    //超级电容初始化
+    Supercap.Init(&hcan2,45);
+    #endif
 
     //电机PID批量初始化
     for (int i = 0; i < 4; i++)
     {
-        Motor_Wheel[i].PID_Omega.Init(1500.0f, 5000.0f, 0.0f, 0.0f, Motor_Wheel[i].Get_Output_Max(), Motor_Wheel[i].Get_Output_Max());
+        Motor_Wheel[i].PID_Omega.Init(1500.0f, 0.0f, 0.0f, 0.0f, Motor_Wheel[i].Get_Output_Max(), Motor_Wheel[i].Get_Output_Max());
     }
 
     //轮向电机ID初始化
@@ -65,7 +65,6 @@ void Class_Tricycle_Chassis::Init(float __Velocity_X_Max, float __Velocity_Y_Max
     Motor_Wheel[1].Init(&hcan1, DJI_Motor_ID_0x202);
     Motor_Wheel[2].Init(&hcan1, DJI_Motor_ID_0x203);
     Motor_Wheel[3].Init(&hcan1, DJI_Motor_ID_0x204);
-
 }
 
 
@@ -73,6 +72,7 @@ void Class_Tricycle_Chassis::Init(float __Velocity_X_Max, float __Velocity_Y_Max
  * @brief 速度解算
  *
  */
+float temp_test_1,temp_test_2,temp_test_3,temp_test_4;
 void Class_Tricycle_Chassis::Speed_Resolution(){
     //获取当前速度值，用于速度解算初始值获取
     switch (Chassis_Control_Type)
@@ -84,11 +84,13 @@ void Class_Tricycle_Chassis::Speed_Resolution(){
             {
                 Motor_Wheel[i].Set_DJI_Motor_Control_Method(DJI_Motor_Control_Method_OMEGA);
                 Motor_Wheel[i].PID_Angle.Set_Integral_Error(0.0f);
-                Motor_Wheel[i].Set_Target_Omega(0.0f);
+                Motor_Wheel[i].Set_Target_Omega_Radian(0.0f);
+                Motor_Wheel[i].Set_Out(0.0f);
             }            
         }
         break;
-        case (Chassis_Control_Type_FLLOW || Chassis_Control_Type_SPIN):
+		case (Chassis_Control_Type_SPIN) :
+        case (Chassis_Control_Type_FLLOW):
         {
             //底盘四电机模式配置
             for (int i = 0; i < 4; i++)
@@ -106,26 +108,41 @@ void Class_Tricycle_Chassis::Speed_Resolution(){
             }
             if (Omega_Max != 0)
             {
-                Math_Constrain(&Omega_Max, -Omega_Max, Omega_Max);
+                Math_Constrain(&Target_Omega, -Omega_Max, Omega_Max);
             }
 
+            #ifdef SPEED_SLOPE
             //速度换算，正运动学分解
             float motor1_temp_linear_vel = Slope_Velocity_Y.Get_Out() - Slope_Velocity_X.Get_Out() + Slope_Omega.Get_Out()*(HALF_WIDTH+HALF_LENGTH);
             float motor2_temp_linear_vel = Slope_Velocity_Y.Get_Out() + Slope_Velocity_X.Get_Out() - Slope_Omega.Get_Out()*(HALF_WIDTH+HALF_LENGTH);
             float motor3_temp_linear_vel = Slope_Velocity_Y.Get_Out() + Slope_Velocity_X.Get_Out() + Slope_Omega.Get_Out()*(HALF_WIDTH+HALF_LENGTH);
             float motor4_temp_linear_vel = Slope_Velocity_Y.Get_Out() - Slope_Velocity_X.Get_Out() - Slope_Omega.Get_Out()*(HALF_WIDTH+HALF_LENGTH);
-
+            #else
+            //速度换算，正运动学分解
+            float motor1_temp_linear_vel = Target_Velocity_Y - Target_Velocity_X + Target_Omega*(HALF_WIDTH+HALF_LENGTH);
+            float motor2_temp_linear_vel = Target_Velocity_Y + Target_Velocity_X - Target_Omega*(HALF_WIDTH+HALF_LENGTH);
+            float motor3_temp_linear_vel = Target_Velocity_Y + Target_Velocity_X + Target_Omega*(HALF_WIDTH+HALF_LENGTH);
+            float motor4_temp_linear_vel = Target_Velocity_Y - Target_Velocity_X - Target_Omega*(HALF_WIDTH+HALF_LENGTH);
+            #endif            
             //线速度 cm/s  转角速度  RAD 
-            float motor1_temp_rad = motor1_temp_linear_vel * VEL2RPM * RPM2RAD;
-            float motor2_temp_rad = motor2_temp_linear_vel * VEL2RPM * RPM2RAD;
-            float motor3_temp_rad = motor3_temp_linear_vel * VEL2RPM * RPM2RAD;
-            float motor4_temp_rad = motor4_temp_linear_vel * VEL2RPM * RPM2RAD;
-            //角速度*减速比  设定目标
-            Motor_Wheel[0].Set_Target_Omega(  motor2_temp_rad * M3508_REDUCTION_RATIO);
-            Motor_Wheel[1].Set_Target_Omega(- motor1_temp_rad * M3508_REDUCTION_RATIO);
-            Motor_Wheel[2].Set_Target_Omega(- motor3_temp_rad * M3508_REDUCTION_RATIO);
-            Motor_Wheel[3].Set_Target_Omega(  motor4_temp_rad * M3508_REDUCTION_RATIO);
-              
+            float motor1_temp_rad = motor1_temp_linear_vel * VEL2RAD;
+            float motor2_temp_rad = motor2_temp_linear_vel * VEL2RAD;
+            float motor3_temp_rad = motor3_temp_linear_vel * VEL2RAD;
+            float motor4_temp_rad = motor4_temp_linear_vel * VEL2RAD;
+            //角速度*减速比  设定目标 直接给到电机输出轴
+            Motor_Wheel[0].Set_Target_Omega_Radian(  motor2_temp_rad);
+            Motor_Wheel[1].Set_Target_Omega_Radian(- motor1_temp_rad);
+            Motor_Wheel[2].Set_Target_Omega_Radian(- motor3_temp_rad);
+            Motor_Wheel[3].Set_Target_Omega_Radian(  motor4_temp_rad);
+            //各个电机具体PID
+            for (int i = 0; i < 4; i++){
+                Motor_Wheel[i].TIM_PID_PeriodElapsedCallback();
+            }
+            //            Motor_Wheel[0].Set_Target_Omega_Radian(  temp_test_1);
+            //            Motor_Wheel[1].Set_Target_Omega_Radian( temp_test_2);
+            //            Motor_Wheel[2].Set_Target_Omega_Radian( temp_test_3);
+            //            Motor_Wheel[3].Set_Target_Omega_Radian(  temp_test_4);
+
             // max=find_max();
             // if(max>MAX_MOTOR_SPEED)
             // {
@@ -144,8 +161,11 @@ void Class_Tricycle_Chassis::Speed_Resolution(){
  * @brief TIM定时器中断计算回调函数
  *
  */
-void Class_Tricycle_Chassis::TIM_Calculate_PeriodElapsedCallback()
+float Power_Limit_K = 1.0f;
+void Class_Tricycle_Chassis::TIM_Calculate_PeriodElapsedCallback(Enum_Sprint_Status __Sprint_Status)
 {
+    #ifdef SPEED_SLOPE
+
     //斜坡函数计算用于速度解算初始值获取
     Slope_Velocity_X.Set_Target(Target_Velocity_X);
     Slope_Velocity_X.TIM_Calculate_PeriodElapsedCallback();
@@ -154,22 +174,47 @@ void Class_Tricycle_Chassis::TIM_Calculate_PeriodElapsedCallback()
     Slope_Omega.Set_Target(Target_Omega);
     Slope_Omega.TIM_Calculate_PeriodElapsedCallback();
 
+    #endif
     //速度解算
     Speed_Resolution();
+
+    #ifdef POWER_LIMIT
     
-    //各个电机具体PID
-    for (int i = 0; i < 4; i++){
-        Motor_Wheel[i].TIM_PID_PeriodElapsedCallback();
+    /****************************超级电容***********************************/
+    Supercap.Set_Now_Power(Referee->Get_Chassis_Power());
+    if(Referee->Get_Referee_Status()==Referee_Status_DISABLE)
+        Supercap.Set_Limit_Power(45.0f);
+    else
+    {
+        float offset;
+        offset = (Referee->Get_Chassis_Energy_Buffer()-20.0f)/4;
+        Supercap.Set_Limit_Power(Referee->Get_Chassis_Power_Max() + offset);
     }
+        
+    Supercap.TIM_Supercap_PeriodElapsedCallback();
 
-   //功率限制
-        // Power_Limit.Set_Power_Limit(Referee->Get_Chassis_Power_Max());   //功率限制45w
-//        Power_Limit.Set_Power_Limit(25.0f);
-        Power_Limit.Set_Motor(Motor_Wheel);   //添加四个电机的控制电流和当前转速
-        Power_Limit.Set_Chassis_Buffer(Referee->Get_Chassis_Energy_Buffer());
-        Power_Limit.TIM_Adjust_PeriodElapsedCallback();  //功率限制算法
-        Power_Limit.Output(Motor_Wheel);    //修改缓冲区
+    /*************************功率限制策略*******************************/
+    if(__Sprint_Status==Sprint_Status_ENABLE)
+    {
+        //功率限制  
+        Power_Limit.Set_Power_Limit(Referee->Get_Chassis_Power_Max()*1.5f);
+    }
+    else
+    {
+        Power_Limit.Set_Power_Limit(Referee->Get_Chassis_Power_Max());
+    }
+    //Power_Limit.Set_Power_Limit(45.0f);
+    Power_Limit.Set_Motor(Motor_Wheel);   //添加四个电机的控制电流和当前转速
+    Power_Limit.Set_Chassis_Buffer(Referee->Get_Chassis_Energy_Buffer());
 
+    if(Supercap.Get_Supercap_Status()==Supercap_Status_DISABLE)
+        Power_Limit.Set_Supercap_Enegry(0.0f);
+    else
+        Power_Limit.Set_Supercap_Enegry(Supercap.Get_Stored_Energy());
+    
+    Power_Limit.TIM_Adjust_PeriodElapsedCallback(Motor_Wheel);  //功率限制算法
+
+    #endif
 }
 
 /************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/

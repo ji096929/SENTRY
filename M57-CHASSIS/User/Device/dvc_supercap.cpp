@@ -30,7 +30,7 @@
  * @param __CAN_ID 收数据绑定的CAN ID
  * @param __Limit_Power_Max 最大限制功率, 0表示不限制
  */
-void Class_Supercap::Init(CAN_HandleTypeDef *hcan, uint16_t __CAN_ID, float __Limit_Power_Max)
+void Class_Supercap::Init(CAN_HandleTypeDef *hcan, float __Limit_Power_Max)
 {
     if(hcan->Instance == CAN1)
     {
@@ -40,8 +40,7 @@ void Class_Supercap::Init(CAN_HandleTypeDef *hcan, uint16_t __CAN_ID, float __Li
     {
         CAN_Manage_Object = &CAN2_Manage_Object;
     }
-    CAN_ID = __CAN_ID;
-    Limit_Power_Max = __Limit_Power_Max;
+    Supercap_Tx_Data.Limit_Power = __Limit_Power_Max;
     CAN_Tx_Data = CAN_Supercap_Tx_Data;
 }
 /**
@@ -79,7 +78,7 @@ void Class_Supercap::Init_UART(UART_HandleTypeDef *__huart, uint8_t __fame_heade
         UART_Manage_Object = &UART6_Manage_Object;
     }
     Supercap_Status = Supercap_Status_DISABLE;
-    Limit_Power_Max = __Limit_Power_Max;
+    Supercap_Tx_Data.Limit_Power = __Limit_Power_Max;
     UART_Manage_Object->UART_Handler = __huart;
     Fame_Header = __fame_header;
     Fame_Tail = __fame_tail;
@@ -92,13 +91,7 @@ void Class_Supercap::Init_UART(UART_HandleTypeDef *__huart, uint8_t __fame_heade
 void Class_Supercap::Data_Process()
 {
     //数据处理过程
-    Struct_Supercap_CAN_Data *tmp_buffer = (Struct_Supercap_CAN_Data *)CAN_Manage_Object->Rx_Buffer.Data;
-    int16_t tmp_stored_energy, tmp_now_power;
-
-    Math_Endian_Reverse_16((void *)&tmp_buffer->Stored_Energy_Reverse, (void *)&tmp_stored_energy);
-    Supercap_Data.Stored_Energy = tmp_stored_energy;
-    Math_Endian_Reverse_16((void *)&tmp_buffer->Now_Power_Reverse, (void *)&tmp_now_power);
-    Supercap_Data.Now_Power = tmp_now_power / 100.0f;
+    memcpy(&Supercap_Data, CAN_Manage_Object->Rx_Buffer.Data, sizeof(Struct_Supercap_CAN_Data));    
 }
 
 /**
@@ -107,7 +100,7 @@ void Class_Supercap::Data_Process()
  */
 void Class_Supercap::Output()
 {
-
+    memcpy(CAN_Tx_Data, &Supercap_Tx_Data, sizeof(Struct_Supercap_Tx_Data));
 }
 /**
  * @brief 
@@ -115,21 +108,22 @@ void Class_Supercap::Output()
  */
 void Class_Supercap::Output_UART()
 {
-    float now_power = Supercap_Data.Now_Power;
+    //float now_power = Supercap_Data.Now_Power;
+    
 
-    UART_Manage_Object->Tx_Buffer[0] = Fame_Header;
-    UART_Manage_Object->Tx_Buffer[1] = 13;
+    // UART_Manage_Object->Tx_Buffer[0] = Fame_Header;
+    // UART_Manage_Object->Tx_Buffer[1] = 13;
 
-    UART_Manage_Object->Tx_Buffer[2] = (uint8_t)(Limit_Power_Max/100)%10;
-    UART_Manage_Object->Tx_Buffer[3] = (uint8_t)(Limit_Power_Max/10)%10;
-    UART_Manage_Object->Tx_Buffer[4] = (uint8_t)Limit_Power_Max%10;
+    // UART_Manage_Object->Tx_Buffer[2] = (uint8_t)(Limit_Power_Max/100)%10;
+    // UART_Manage_Object->Tx_Buffer[3] = (uint8_t)(Limit_Power_Max/10)%10;
+    // UART_Manage_Object->Tx_Buffer[4] = (uint8_t)Limit_Power_Max%10;
 
-    UART_Manage_Object->Tx_Buffer[5] = (uint8_t)(now_power/100)%10;
-    UART_Manage_Object->Tx_Buffer[6] = (uint8_t)(now_power/10)%10;
-    UART_Manage_Object->Tx_Buffer[7] = (uint8_t)now_power%10;
-    UART_Manage_Object->Tx_Buffer[8] = (uint8_t)(now_power*10)%10;
+    // UART_Manage_Object->Tx_Buffer[5] = (uint8_t)(now_power/100)%10;
+    // UART_Manage_Object->Tx_Buffer[6] = (uint8_t)(now_power/10)%10;
+    // UART_Manage_Object->Tx_Buffer[7] = (uint8_t)now_power%10;
+    // UART_Manage_Object->Tx_Buffer[8] = (uint8_t)(now_power*10)%10;
 
-    UART_Manage_Object->Tx_Buffer[9] = Fame_Tail;
+    // UART_Manage_Object->Tx_Buffer[9] = Fame_Tail;
 }
 
 /**
@@ -193,9 +187,18 @@ void Class_Supercap::TIM_Alive_PeriodElapsedCallback()
  * @brief TIM定时器修改发送缓冲区
  * 
  */
-void Class_Supercap::TIM_UART_PeriodElapsedCallback()
+void Class_Supercap::TIM_UART_Tx_PeriodElapsedCallback()
 {
     Output_UART();
+}
+
+/**
+ * @brief TIM定时器修改发送缓冲区
+ * 
+ */
+void Class_Supercap::TIM_Supercap_PeriodElapsedCallback()
+{
+    Output();
 }
 
 /************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/

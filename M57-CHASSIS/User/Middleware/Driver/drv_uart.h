@@ -38,6 +38,9 @@ struct Struct_UART_Manage_Object
     uint8_t Tx_Buffer[UART_BUFFER_SIZE];
     uint8_t Rx_Buffer[UART_BUFFER_SIZE];
     uint16_t Rx_Buffer_Length;
+    uint16_t Tx_Buffer_Length;
+    uint16_t Rx_Length;
+    uint16_t Tx_Length;
     UART_Call_Back Callback_Function;
 };
 

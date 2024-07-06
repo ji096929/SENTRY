@@ -16,7 +16,7 @@
 ##########################################################################################
 
 version: "1.0"
-files: null
+files:
+    USB_DEVICE/Target/usbd_conf.c: --c99
 virtualPathFiles:
-    <virtual_root>/Application/User/USB_DEVICE/Target/usbd_conf.c: --c99
     <virtual_root>/Middlewares/USB_Device_Library/usbd_cdc.c: --c99

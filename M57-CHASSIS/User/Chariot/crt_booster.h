@@ -22,21 +22,12 @@
 #include "alg_fsm.h"
 #include "dvc_referee.h"
 #include "dvc_djimotor.h"
-#include "dvc_minipc.h"
-#include "crt_gimbal.h"
-#include "user_lib.h"
 
 /* Exported macros -----------------------------------------------------------*/
 
 /* Exported types ------------------------------------------------------------*/
 
 class Class_Booster;
-
-enum Enum_Booster_User_Control_Type
-{
-    Booster_User_Control_Type_SINGLE = 0,
-    Booster_User_Control_Type_MULTI,
-};
 
 /**
  * @brief 发射机构控制类型
@@ -49,8 +40,18 @@ enum Enum_Booster_Control_Type
     Booster_Control_Type_SINGLE,
     Booster_Control_Type_REPEATED,
     Booster_Control_Type_MULTI,  //连发
-    Booster_Control_Type_MINIPC,
 };
+
+/**
+ * @brief 摩擦轮控制类型
+ *
+ */
+enum Enum_Friction_Control_Type
+{
+    Friction_Control_Type_DISABLE = 0,
+    Friction_Control_Type_ENABLE,
+};
+
 
 /**
  * @brief Specialized, 热量检测有限自动机
@@ -95,14 +96,10 @@ public:
 
     //裁判系统
     Class_Referee *Referee;
-    
-    //上位机
-    Class_MiniPC MiniPC;
 
     //拨弹盘电机
     Class_DJI_Motor_C610 Motor_Driver;
 
-    Class_Gimbal *Gimbal;
     //摩擦轮电机左
     Class_DJI_Motor_C620 Motor_Friction_Left;
     //摩擦轮电机右
@@ -111,55 +108,56 @@ public:
     void Init();
 
     inline float Get_Default_Driver_Omega();
+    inline float Get_Friction_Omega();
+    inline float Get_Friction_Omega_Threshold();
 
     inline Enum_Booster_Control_Type Get_Booster_Control_Type();
-    inline Enum_Booster_User_Control_Type Get_Booster_User_Control_Type();
+    inline Enum_Friction_Control_Type Get_Friction_Control_Type();
 
     inline void Set_Booster_Control_Type(Enum_Booster_Control_Type __Booster_Control_Type);
-    inline void Set_Booster_User_Control_Type(Enum_Booster_User_Control_Type __Booster_User_Control_Type);
+    inline void Set_Friction_Control_Type(Enum_Friction_Control_Type __Friction_Control_Type);
     inline void Set_Friction_Omega(float __Friction_Omega);
     inline void Set_Driver_Omega(float __Driver_Omega);
 
     void TIM_Calculate_PeriodElapsedCallback();
-
+	void Output();
+		
 protected:
     //初始化相关常量
 
     //常量
-    //拨弹盘堵转角速度阈值(弧度制), 低于该速度并且处于大扭矩状态认为卡弹
-    float Driver_Omega_Threshold = 0.1f;
+
     //拨弹盘堵转扭矩阈值, 超出被认为卡弹
     uint16_t Driver_Torque_Threshold = 5500;
     //摩擦轮单次判定发弹阈值, 超出被认为发射子弹
     uint16_t Friction_Torque_Threshold = 3300;
     //摩擦轮速度判定发弹阈值, 超出则说明已经开机
-    uint16_t Friction_Omega_Threshold = 695;
+    float Friction_Omega_Threshold = 600;
 
     //内部变量
-    float Now_Angle=0;
+
     //读变量
 
-    //拨弹盘默认速度, 一圈十发子弹,
-    float Default_Driver_Omega = -2.5f * PI;
+    //拨弹盘默认速度, 一圈八发子弹, 此速度下与冷却均衡
+    float Default_Driver_Omega = -2.0f * PI;
 
     //写变量
 
     //发射机构状态
-    Enum_Booster_Control_Type Booster_Control_Type = Booster_Control_Type_DISABLE;
-    Enum_Booster_Control_Type Booster_Pre_Control_Type = Booster_Control_Type_DISABLE;
-    Enum_Booster_User_Control_Type  Booster_User_Control_Type = Booster_User_Control_Type_SINGLE;
-
-    // 摩擦轮角速度
-    float Friction_Omega = 750.0f;
+    Enum_Booster_Control_Type Booster_Control_Type = Booster_Control_Type_CEASEFIRE;
+    Enum_Friction_Control_Type Friction_Control_Type = Friction_Control_Type_DISABLE;
+    //摩擦轮角速度
+    float Friction_Omega = 800.0f;
+		
     //拨弹盘实际的目标速度, 一圈八发子弹
     float Driver_Omega = -2.0f * PI;
     //拨弹轮目标绝对角度 加圈数
-    float Driver_Angle = 0.0f;
+    float Drvier_Angle = 0.0f;
     //读写变量
 
     //内部函数
 
-    void Output();
+    
 };
 
 /* Exported variables --------------------------------------------------------*/
@@ -176,14 +174,24 @@ float Class_Booster::Get_Default_Driver_Omega()
     return (Default_Driver_Omega);
 }
 
-Enum_Booster_Control_Type Class_Booster::Get_Booster_Control_Type()
+/**
+ * @brief 获取摩擦轮默认速度,
+ *
+ * @return float 获取摩擦轮默认速度
+ */
+float Class_Booster::Get_Friction_Omega()
 {
-    return (Booster_Control_Type);
+    return (Friction_Omega);
 }
 
-Enum_Booster_User_Control_Type Class_Booster::Get_Booster_User_Control_Type()
+/**
+ * @brief 获取摩擦轮默认速度,
+ *
+ * @return float 获取摩擦轮默认速度
+ */
+float Class_Booster::Get_Friction_Omega_Threshold()
 {
-    return (Booster_User_Control_Type);
+    return (Friction_Omega_Threshold);
 }
 
 /**
@@ -196,9 +204,35 @@ void Class_Booster::Set_Booster_Control_Type(Enum_Booster_Control_Type __Booster
     Booster_Control_Type = __Booster_Control_Type;
 }
 
-void Class_Booster::Set_Booster_User_Control_Type(Enum_Booster_User_Control_Type __Booster_User_Control_Type)
+/**
+ * @brief 设定发射机构状态
+ *
+ * @param __Booster_Control_Type 发射机构状态
+ */
+void Class_Booster::Set_Friction_Control_Type(Enum_Friction_Control_Type __Friction_Control_Type)
 {
-    Booster_User_Control_Type = __Booster_User_Control_Type;
+    Friction_Control_Type = __Friction_Control_Type;
+}
+
+/**
+ * @brief 获得发射机构状态
+ *
+ * @return Enum_Booster_Control_Type 发射机构状态
+ */
+Enum_Booster_Control_Type Class_Booster::Get_Booster_Control_Type()
+{
+    return (Booster_Control_Type);
+}
+
+/**
+ * @brief 获得发射机构状态
+ *
+ * @return Enum_Booster_Control_Type 发射机构状态
+ */
+Enum_Friction_Control_Type Class_Booster::Get_Friction_Control_Type()
+{
+    return (Friction_Control_Type);
+
 }
 
 /**

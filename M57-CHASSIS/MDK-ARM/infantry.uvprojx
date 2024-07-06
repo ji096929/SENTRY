@@ -311,7 +311,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>2</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -336,7 +336,7 @@
               <MiscControls>--cpp11</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx,ARM_MATH_CM4,__CC_ARM,ARM_MATH_MATRIX_CHECK,ARM_MATH_ROUNDING,__TARGET_FPU_VFP,__FPU_PRESENT=1</Define>
               <Undefine></Undefine>
-              <IncludePath>../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../User/Chariot;../User/Device;../User/Interaction;../User/Middleware/Algorithm;../User/Middleware/Driver;../User/Task;../Drivers/CMSIS/DSP/Include;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../Core/Inc</IncludePath>
+              <IncludePath>../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../User/Chariot;../User/Device;../User/Interaction;../User/Middleware/Algorithm;../User/Middleware/Driver;../User/Task;../Drivers/CMSIS/DSP/Include;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../Core/Inc;../User/Congfig</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -756,11 +756,6 @@
               <FilePath>..\User\Device\dvc_imu.cpp</FilePath>
             </File>
             <File>
-              <FileName>dvc_buzzer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\Device\dvc_buzzer.c</FilePath>
-            </File>
-            <File>
               <FileName>dvc_boardc_bmi088.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\User\Device\dvc_boardc_bmi088.cpp</FilePath>
@@ -781,14 +776,14 @@
               <FilePath>..\User\Device\dvc_dmmotor.cpp</FilePath>
             </File>
             <File>
-              <FileName>dvc_dr16.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\User\Device\dvc_dr16.cpp</FilePath>
-            </File>
-            <File>
               <FileName>dvc_lkmotor.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\User\Device\dvc_lkmotor.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>dvc_dr16.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\User\Device\dvc_dr16.cpp</FilePath>
             </File>
             <File>
               <FileName>dvc_supercap.cpp</FileName>
@@ -834,6 +829,26 @@
               <FileName>dvc_dwt.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\User\Device\dvc_dwt.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>CharSendTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\Device\CharSendTask.c</FilePath>
+            </File>
+            <File>
+              <FileName>GraphicsSendTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\Device\GraphicsSendTask.c</FilePath>
+            </File>
+            <File>
+              <FileName>ui.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\Device\ui.c</FilePath>
+            </File>
+            <File>
+              <FileName>dvc_GraphicsSendTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\Device\dvc_GraphicsSendTask.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -898,7 +913,7 @@
             <File>
               <FileName>alg_power_limit.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\User\Middleware\Algorithm\alg_power_limit.cpp</FilePath>
+              <FilePath>..\User\Device\alg_power_limit.cpp</FilePath>
             </File>
           </Files>
         </Group>
@@ -954,11 +969,6 @@
               <FileName>drv_usb.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\Middleware\Driver\drv_usb.c</FilePath>
-            </File>
-            <File>
-              <FileName>drv_buzzer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\Middleware\Driver\drv_buzzer.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1428,6 +1438,16 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>Config</GroupName>
+          <Files>
+            <File>
+              <FileName>config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\Congfig\config.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
@@ -1437,8 +1457,8 @@
   <RTE>
     <apis/>
     <components>
-      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.0.1" condition="ARMv6_7_8-M Device">
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.0.1"/>
+      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.6.0" condition="ARMv6_7_8-M Device">
+        <package name="CMSIS" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="5.9.0"/>
         <targetInfos>
           <targetInfo name="infantry"/>
         </targetInfos>

@@ -37,8 +37,8 @@
 #include "ita_chariot.h"
 #include "dvc_boardc_ist8310.h"
 #include "dvc_imu.h"
-#include "dvc_buzzer.h"
-
+#include "CharSendTask.h"
+#include "GraphicsSendTask.h"
 /* Exported macros -----------------------------------------------------------*/
 
 /* Exported types ------------------------------------------------------------*/

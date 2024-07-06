@@ -1,9 +1,9 @@
 /**
  * @file dvc_dmmotor.h
  * @author yssickjgd (1345578933@qq.com)
- * @brief 겿ص�����������
+ * @brief ?????????????
  * @version 0.1
- * @date 2023-08-30 0.1 ����
+ * @date 2023-08-30 0.1 ????
  *
  * @copyright USTC-RoboWalker (c) 2022
  *
@@ -23,7 +23,7 @@
 /* Exported types ------------------------------------------------------------*/
 
 /**
- * @brief ������״̬
+ * @brief ????????
  *
  */
 enum Enum_LK_Motor_Status
@@ -33,7 +33,7 @@ enum Enum_LK_Motor_Status
 };
 
 /**
- * @brief ��������IDö������
+ * @brief ????????ID???????
  *
  */
 enum Enum_LK_Motor_ID : uint8_t
@@ -50,7 +50,7 @@ enum Enum_LK_Motor_ID : uint8_t
 };
 
 /**
- * @brief ����������״̬
+ * @brief ????????????
  *
  */
 enum Enum_LK_Motor_Control_Status
@@ -60,19 +60,19 @@ enum Enum_LK_Motor_Control_Status
 };
 
 /**
- * @brief ������can����cmd_id
+ * @brief ??????can????cmd_id
  *
  */
 enum Enum_LK_Motor_Control_ID : uint8_t
 {
-    LK_Motor_Control_Shut_Down = 0x80,   //����ر�?
-    LK_Motor_Control_Stop = 0x81, //���ͣ�?
-    LK_Motor_Control_Run = 0x88,//�������?
-    LK_Motor_Control_Torque = 0xA1,//���رջ�����
+    LK_Motor_Control_Shut_Down = 0x80,   //??????
+    LK_Motor_Control_Stop = 0x81, //?????
+    LK_Motor_Control_Run = 0x88,//???????
+    LK_Motor_Control_Torque = 0xA1,//??????????
 };
 
 /**
- * @brief ���������Ʒ�ʽ
+ * @brief ????????????
  *
  */
 enum Enum_LK_Motor_Control_Method
@@ -85,49 +85,51 @@ enum Enum_LK_Motor_Control_Method
 };
 
 /**
- * @brief ������Դ����
+ * @brief ???????????
  *
  */
 struct Struct_LK_Motor_CAN_Rx_Data
 {
     Enum_LK_Motor_Control_ID CMD_ID;
-    uint8_t Temperature_Centigrade;  //���϶�
+    uint8_t Temperature_Centigrade;  //?????
     uint16_t Current_Reverse;
     uint16_t Omega_Reverse;
     uint16_t Encoder_Reverse;
 } __attribute__((packed));
 
 /**
- * @brief ��������������������, Ť�طǹ��ʵ�λ��
+ * @brief ????????????????????, ???��????��??
  *
  */
 struct Struct_LK_Motor_Rx_Data
 {
-    Enum_LK_Motor_Control_ID CMD_ID;  //��������ID
-    float Now_Angle;  //�Ƕ���
-    float Now_Omega;  //������
-    float Now_Current;  //����
-    float Now_Temperature; //���϶�
+    Enum_LK_Motor_Control_ID CMD_ID;  //????????ID
+    float Now_Angle;  //��ǰ�Ƕ� ���Ƕ��ƣ�
+    float Now_Radian;  //��ǰ�Ƕ� �������ƣ�
+    float Now_Omega_Angle;  //��ǰ���ٶ� (�Ƕ���)
+    float Now_Omega_Radian;  //��ǰ���ٶ� (������)
+    float Now_Current;  
+    float Now_Temperature; 
     uint16_t Pre_Encoder; 
     int32_t Total_Encoder;
     int32_t Total_Round;
 };
 
 /**
- * @brief LK��ˢ���?, ��Ƭ��������������?
- * DM_Motor_Control_Method_POSITION_OMEGAģʽ��, ��������ָ�������λ�û�PI����, ����250��0
+ * @brief LK??????, ?????????????????
+ * DM_Motor_Control_Method_POSITION_OMEGA????, ????????????????��???PI????, ????250??0
  * 
- * PMAXֵ���ڵ�����������Ϊ3.141593, ��PI, ��ʱ����IMUģʽ�µ����ʹ��?
+ * PMAX?????????????????3.141593, ??PI, ???????IMU???????????
  *
  */
 class Class_LK_Motor
 {
 public:
-    // PID�ǶȻ�����
+    // PID????????
     Class_PID PID_Angle;
-    // PID���ٶȻ�����
+    // PID??????????
     Class_PID PID_Omega;
-    // PIDŤ�ػ�����
+    // PID????????
     Class_PID PID_Torque;
 
     void Init(CAN_HandleTypeDef *hcan, Enum_LK_Motor_ID __CAN_ID, float __Omega_Max, int32_t __Position_Offset = 0, float __Current_Max = 33.0f ,Enum_LK_Motor_Control_Method __Control_Method = LK_Motor_Control_Method_IMU_ANGLE);
@@ -136,14 +138,18 @@ public:
     inline Enum_LK_Motor_Status Get_LK_Motor_Status();
     inline float Get_Output_Max();
     inline float Get_Now_Angle();
-    inline float Get_Now_Omega();
+    inline float Get_Now_Radian();
+    inline float Get_Now_Omega_Angle();
+    inline float Get_Now_Omega_Radian();
     inline float Get_Now_Torque();
     inline float Get_Now_Temperature();
     inline Enum_LK_Motor_Control_Method Get_Control_Method();
     inline float Get_IMU_K_P();
     inline float Get_IMU_K_D();
     inline float Get_Target_Angle();
-    inline float Get_Target_Omega();
+    inline float Get_Target_Radian();
+    inline float Get_Target_Omega_Angle();
+    inline float Get_Target_Omega_Radian();
     inline float Get_Target_Torque();
     
     inline void Set_LK_Control_Status(Enum_LK_Motor_Control_Status __DM_Motor_Control_Status);
@@ -151,7 +157,9 @@ public:
     inline void Set_IMU_K_P(float __IMU_K_P);
     inline void Set_IMU_K_D(float __IMU_K_D);
     inline void Set_Target_Angle(float __Target_Angle);
-    inline void Set_Target_Omega(float __Target_Omega);
+    inline void Set_Target_Radian(float __Target_Radian);
+    inline void Set_Target_Omega_Angle(float __Target_Omega_Angle);
+    inline void Set_Target_Omega_Radian(float __Target_Omega_Radian);
     inline void Set_Target_Current(float __Target_Current);
     inline void Set_Target_Torque(float __Target_Torque);
     inline void Set_Out(float __Out);
@@ -161,70 +169,62 @@ public:
     void TIM_Process_PeriodElapsedCallback();
 
 protected:
-    //��ʼ����ر���?
-
-    //�󶨵�CAN
-    Struct_CAN_Manage_Object *CAN_Manage_Object;
-    //�����ݰ󶨵�CAN ID, ����֡��0xxa1~0xxaf
-    Enum_LK_Motor_ID CAN_ID;
-    //���ͻ�����
-    uint8_t *CAN_Tx_Data;
-    //λ�÷���ƫ��
-    uint32_t Position_Offset;
-    //����ٶ�?, ������������, �Ƽ�20.94359, Ҳ��������?��200rpm
-    float Omega_Max;
-    //���Ť��?, ������������, �Ƽ�7, Ҳ����������7NM
-    float Current_Max;
-    //����͵����?
-    const int16_t Current_Max_Cmd = 2000;
-    //���������?
-    float Out = 0.0f;
-    //����
     
-    const float Torque_Current = 0.3;  //Ϲд�� ����ת��ϵ��
+    Struct_CAN_Manage_Object *CAN_Manage_Object;
+    
+    Enum_LK_Motor_ID CAN_ID;
+    
+    uint8_t *CAN_Tx_Data;
+    
+    uint32_t Position_Offset;
+    
+    float Omega_Max;
+    
+    float Current_Max;
+    
+    const int16_t Current_Max_Cmd = 2000;
+    
+    float Out = 0.0f;
+    
+    
+    const float Torque_Current = 0.3;  
 
-    //һȦλ�ÿ̶�
+    
     uint32_t Position_Max = 16383;
 
 
-    
-    //�ڲ�����
+    //����ϵ��һ֡��־λ
+    uint8_t Start_Flag = 0;
 
-    //��ǰʱ�̵ĵ������flag
     uint32_t Flag = 0;
-    //ǰһʱ�̵ĵ������flag
+    
     uint32_t Pre_Flag = 0;
 
-    //������
 
-    //���״�?
     Enum_LK_Motor_Status LK_Motor_Status = LK_Motor_Status_DISABLE;
-    //�������ӿ���Ϣ
+    
     Struct_LK_Motor_Rx_Data Data;
 
-    //д����
 
-    //��д����
-
-    //�����������ģ�?
     Enum_LK_Motor_Control_ID LK_Motor_Control_ID = LK_Motor_Control_Torque;
-    //�������״�?
+    
     Enum_LK_Motor_Control_Status LK_Motor_Control_Status = LK_Motor_Control_Status_DISABLE;
-    //������Ʒ��?
+    
     Enum_LK_Motor_Control_Method LK_Motor_Control_Method = LK_Motor_Control_Method_IMU_ANGLE;
-    //MIT��Kpֵ, 0~500, ����6, λ�ÿ�����Ҫ
+    
     float IMU_K_P = 0.0f;
-    //MIT��Kdֵ, 0~5, ����0.2, λ�ú��ٶȿ�����Ҫ
+    
     float IMU_K_D = 0.0f;
-    //Ŀ��ĽǶ�?, rad
+
+    float Target_Radian = 0.0f;
     float Target_Angle = 0.0f;
-    //Ŀ����ٶ�?, rad/s
-    float Target_Omega = 0.0f;
-    //Ŀ��ĵ���?
+    float Target_Omega_Radian = 0.0f;
+    float Target_Omega_Angle = 0.0f;
+    
     float Target_Current = 0.0f;
-    //Ŀ������
+    
     float Target_Torque = 0.0f;
-    //�ڲ�����
+    
  
     void Output(void);
     void Data_Process();
@@ -235,9 +235,9 @@ protected:
 /* Exported function declarations --------------------------------------------*/
 
 /**
- * @brief ��ȡ���״�?
+ * @brief ????????
  *
- * @return Enum_LK_Motor_Status ���״�?
+ * @return Enum_LK_Motor_Status ?????
  */
 Enum_LK_Motor_Status Class_LK_Motor::Get_LK_Motor_Status()
 {
@@ -246,9 +246,9 @@ Enum_LK_Motor_Status Class_LK_Motor::Get_LK_Motor_Status()
 
 
 /**
- * @brief ��ȡ���״�?
+ * @brief ????????
  *
- * @return Enum_LK_Motor_Status ���״�?
+ * @return Enum_LK_Motor_Status ?????
  */
 Enum_LK_Motor_Control_Status Class_LK_Motor::Get_LK_Motor_Control_Status()
 {
@@ -257,9 +257,9 @@ Enum_LK_Motor_Control_Status Class_LK_Motor::Get_LK_Motor_Control_Status()
 
 
 /**
- * @brief ��ȡ��ǰ�ĽǶ�, rad
+ * @brief ??????????, rad
  *
- * @return float ��ǰ�ĽǶ�, rad
+ * @return float ???????, rad
  */
 float Class_LK_Motor::Get_Now_Angle()
 {
@@ -267,19 +267,39 @@ float Class_LK_Motor::Get_Now_Angle()
 }
 
 /**
- * @brief ��ȡ��ǰ���ٶ�, rad/s
+ * @brief ??????????, rad
  *
- * @return float ��ǰ���ٶ�, rad/s
+ * @return float ???????, rad
  */
-float Class_LK_Motor::Get_Now_Omega()
+float Class_LK_Motor::Get_Now_Radian()
 {
-    return (Data.Now_Omega);
+    return (Data.Now_Radian);
 }
 
 /**
- * @brief ��ȡ��ǰ��Ť��, ֱ�Ӳ��÷���ֵ
+ * @brief ???????????, rad/s
  *
- * @return float ��ǰ��Ť��, ֱ�Ӳ��÷���ֵ
+ * @return float ????????, rad/s
+ */
+float Class_LK_Motor::Get_Now_Omega_Radian()
+{
+    return (Data.Now_Omega_Radian);
+}
+
+/**
+ * @brief ???????????, rad/s
+ *
+ * @return float ????????, rad/s
+ */
+float Class_LK_Motor::Get_Now_Omega_Angle()
+{
+    return (Data.Now_Omega_Angle);
+}
+
+/**
+ * @brief ???????????, ?????��????
+ *
+ * @return float ????????, ?????��????
  */
 float Class_LK_Motor::Get_Now_Torque()
 {
@@ -287,9 +307,9 @@ float Class_LK_Motor::Get_Now_Torque()
 }
 
 /**
- * @brief ��ȡ��ǰMOS�ܵ��¶�, ���϶�
+ * @brief ??????MOS??????, ?????
  *
- * @return float ��ǰMOS�ܵ��¶�, ���϶�
+ * @return float ???MOS??????, ?????
  */
 float Class_LK_Motor::Get_Now_Temperature()
 {
@@ -297,9 +317,9 @@ float Class_LK_Motor::Get_Now_Temperature()
 }
 
 /**
- * @brief ��ȡ������Ʒ��?
+ * @brief ????????????
  *
- * @return Enum_LK_Motor_Control_Method ������Ʒ��?
+ * @return Enum_LK_Motor_Control_Method ?????????
  */
 Enum_LK_Motor_Control_Method Class_LK_Motor::Get_Control_Method()
 {
@@ -307,9 +327,9 @@ Enum_LK_Motor_Control_Method Class_LK_Motor::Get_Control_Method()
 }
 
 /**
- * @brief ��ȡMIT��Kpֵ, 0~500
+ * @brief ???MIT??Kp?, 0~500
  *
- * @return float MIT��Kpֵ, 0~500
+ * @return float MIT??Kp?, 0~500
  */
 float Class_LK_Motor::Get_IMU_K_P()
 {
@@ -317,9 +337,9 @@ float Class_LK_Motor::Get_IMU_K_P()
 }
 
 /**
- * @brief ��ȡMIT��Kdֵ, 0~5
+ * @brief ???MIT??Kd?, 0~5
  *
- * @return float MIT��Kdֵ, 0~5
+ * @return float MIT??Kd?, 0~5
  */
 float Class_LK_Motor::Get_IMU_K_D()
 {
@@ -327,9 +347,9 @@ float Class_LK_Motor::Get_IMU_K_D()
 }
 
 /**
- * @brief ��ȡĿ��ĽǶ�?, rad
+ * @brief ?????????, rad
  *
- * @return float Ŀ��ĽǶ�?, rad
+ * @return float ??????, rad
  */
 float Class_LK_Motor::Get_Target_Angle()
 {
@@ -337,19 +357,39 @@ float Class_LK_Motor::Get_Target_Angle()
 }
 
 /**
- * @brief ��ȡĿ����ٶ�?, rad/s
+ * @brief ?????????, rad
  *
- * @return float Ŀ����ٶ�?, rad/s
+ * @return float ??????, rad
  */
-float Class_LK_Motor::Get_Target_Omega()
+float Class_LK_Motor::Get_Target_Radian()
 {
-    return (Target_Omega);
+    return (Target_Radian);
 }
 
 /**
- * @brief ��ȡĿ���Ť��?
+ * @brief ??????????, rad/s
  *
- * @return float Ŀ���Ť��?
+ * @return float ???????, rad/s
+ */
+float Class_LK_Motor::Get_Target_Omega_Angle()
+{
+    return (Target_Omega_Angle);
+}
+
+/**
+ * @brief ??????????, rad/s
+ *
+ * @return float ???????, rad/s
+ */
+float Class_LK_Motor::Get_Target_Omega_Radian()
+{
+    return (Target_Omega_Radian);
+}
+
+/**
+ * @brief ??????????
+ *
+ * @return float ???????
  */
 float Class_LK_Motor::Get_Target_Torque()
 {
@@ -357,9 +397,9 @@ float Class_LK_Motor::Get_Target_Torque()
 }
 
 /**
- * @brief �趨�������״�?
+ * @brief ?څ?????????
  *
- * @param __DM_Motor_Control_Status �������״�?
+ * @param __DM_Motor_Control_Status ?????????
  */
 void Class_LK_Motor::Set_LK_Control_Status(Enum_LK_Motor_Control_Status __DM_Motor_Control_Status)
 {
@@ -367,9 +407,9 @@ void Class_LK_Motor::Set_LK_Control_Status(Enum_LK_Motor_Control_Status __DM_Mot
 }
 
 /**
- * @brief �趨������Ʒ��?
+ * @brief ?څ?????????
  *
- * @param __Control_Method ������Ʒ��?
+ * @param __Control_Method ?????????
  */
 void Class_LK_Motor::Set_LK_Motor_Control_Method(Enum_LK_Motor_Control_Method __Control_Method)
 {
@@ -377,9 +417,9 @@ void Class_LK_Motor::Set_LK_Motor_Control_Method(Enum_LK_Motor_Control_Method __
 }
 
 /**
- * @brief �趨MIT��Kpֵ, 0~500, ����6, λ�ÿ�����Ҫ
+ * @brief ?څMIT??Kp?, 0~500, ????6, ��????????
  *
- * @param __MIT_K_P MIT��Kpֵ, 0~500, ����6, λ�ÿ�����Ҫ
+ * @param __MIT_K_P MIT??Kp?, 0~500, ????6, ��????????
  */
 void Class_LK_Motor::Set_IMU_K_P(float __IMU_K_P)
 {
@@ -387,9 +427,9 @@ void Class_LK_Motor::Set_IMU_K_P(float __IMU_K_P)
 }
 
 /**
- * @brief �趨MIT��Kdֵ, 0~5, ����0.2, λ�ú��ٶȿ�����Ҫ
+ * @brief ?څMIT??Kd?, 0~5, ????0.2, ��?��??????????
  *
- * @param __MIT_K_D MIT��Kdֵ, 0~5, ����0.2, λ�ú��ٶȿ�����Ҫ
+ * @param __MIT_K_D MIT??Kd?, 0~5, ????0.2, ��?��??????????
  */
 void Class_LK_Motor::Set_IMU_K_D(float __IMU_K_D)
 {
@@ -397,9 +437,9 @@ void Class_LK_Motor::Set_IMU_K_D(float __IMU_K_D)
 }
 
 /**
- * @brief �趨Ŀ��ĽǶ�?, rad
+ * @brief ?څ??????, rad
  *
- * @param __Target_Angle Ŀ��ĽǶ�?, rad
+ * @param __Target_Angle ??????, rad
  */
 void Class_LK_Motor::Set_Target_Angle(float __Target_Angle)
 {
@@ -407,19 +447,39 @@ void Class_LK_Motor::Set_Target_Angle(float __Target_Angle)
 }
 
 /**
- * @brief �趨Ŀ����ٶ�?, rad/s
+ * @brief ?څ??????, rad
  *
- * @param __Target_Omega Ŀ����ٶ�?, rad/s
+ * @param __Target_Angle ??????, rad
  */
-void Class_LK_Motor::Set_Target_Omega(float __Target_Omega)
+void Class_LK_Motor::Set_Target_Radian(float __Target_Radian)
 {
-    Target_Omega = __Target_Omega;
+    Target_Radian = __Target_Radian;
 }
 
 /**
- * @brief �趨Ŀ������ص���?
+ * @brief ?څ???????, rad/s
  *
- * @param __Target_Current Ŀ������ص���?
+ * @param __Target_Omega ???????, rad/s
+ */
+void Class_LK_Motor::Set_Target_Omega_Radian(float __Target_Omega_Radian)
+{
+    Target_Omega_Radian = __Target_Omega_Radian;
+}
+
+/**
+ * @brief ?څ???????, rad/s
+ *
+ * @param __Target_Omega ???????, rad/s
+ */
+void Class_LK_Motor::Set_Target_Omega_Angle(float __Target_Omega_Angle)
+{
+    Target_Omega_Angle = __Target_Omega_Angle;
+}
+
+/**
+ * @brief ?څ???????????
+ *
+ * @param __Target_Current ???????????
  */
 void Class_LK_Motor::Set_Target_Current(float __Target_Current)
 {
@@ -427,9 +487,9 @@ void Class_LK_Motor::Set_Target_Current(float __Target_Current)
 }
 
 /**
- * @brief �趨Ŀ������ص���?
+ * @brief ?څ???????????
  *
- * @param __Target_Torque Ŀ������ص���?
+ * @param __Target_Torque ???????????
  */
 void Class_LK_Motor::Set_Target_Torque(float __Target_Torque)
 {

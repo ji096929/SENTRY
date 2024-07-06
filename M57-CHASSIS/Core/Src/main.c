@@ -29,8 +29,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "usb_device.h"
 #include "tsk_config_and_callback.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,7 +71,6 @@ void SystemClock_Config(void);
   */
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -79,8 +78,6 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-
-
   HAL_Init();
 
   /* USER CODE BEGIN Init */
@@ -110,16 +107,16 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_USART1_UART_Init();
   MX_TIM1_Init();
-  MX_TIM12_Init();
   /* USER CODE BEGIN 2 */
   Task_Init();
-  buzzer_setTask(&buzzer,BUZZER_DJI_STARTUP_PRIORITY);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    
+    Task_Loop();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

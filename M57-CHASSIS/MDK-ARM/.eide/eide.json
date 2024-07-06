@@ -3,17 +3,12 @@
   "type": "ARM",
   "dependenceList": [],
   "srcDirs": [
-    ".eide/deps"
+    "../USB_DEVICE"
   ],
   "virtualFolder": {
     "name": "<virtual_root>",
     "files": [],
     "folders": [
-      {
-        "name": "::CMSIS",
-        "files": [],
-        "folders": []
-      },
       {
         "name": "Application",
         "files": [],
@@ -102,93 +97,9 @@
         ]
       },
       {
-        "name": "Chariot",
-        "files": [
-          {
-            "path": "../User/Chariot/crt_booster.cpp"
-          },
-          {
-            "path": "../User/Chariot/crt_chassis.cpp"
-          },
-          {
-            "path": "../User/Chariot/crt_gimbal.cpp"
-          }
-        ],
-        "folders": []
-      },
-      {
-        "name": "Device",
-        "files": [
-          {
-            "path": "../User/Device/dvc_boardc_bmi088.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_boardc_ist8310.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_buzzer.c"
-          },
-          {
-            "path": "../User/Device/dvc_djimotor.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_dmmotor.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_dr16.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_dwt.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_imu.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_lkmotor.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_manifold.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_minipc.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_referee.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_sampler.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_serialplot.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_servo.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_supercap.cpp"
-          },
-          {
-            "path": "../User/Device/dvc_witahrs.cpp"
-          }
-        ],
-        "folders": []
-      },
-      {
         "name": "Drivers",
         "files": [],
         "folders": [
-          {
-            "name": "CMSIS",
-            "files": [
-              {
-                "path": "../Drivers/CMSIS/Lib/ARM/arm_cortexM4lf_math.lib"
-              },
-              {
-                "path": "../Core/Src/system_stm32f4xx.c"
-              }
-            ],
-            "folders": []
-          },
           {
             "name": "STM32F4xx_HAL_Driver",
             "files": [
@@ -263,8 +174,101 @@
               }
             ],
             "folders": []
+          },
+          {
+            "name": "CMSIS",
+            "files": [
+              {
+                "path": "../Drivers/CMSIS/Lib/ARM/arm_cortexM4lf_math.lib"
+              },
+              {
+                "path": "../Core/Src/system_stm32f4xx.c"
+              }
+            ],
+            "folders": []
           }
         ]
+      },
+      {
+        "name": "Chariot",
+        "files": [
+          {
+            "path": "../User/Chariot/crt_booster.cpp"
+          },
+          {
+            "path": "../User/Chariot/crt_chassis.cpp"
+          },
+          {
+            "path": "../User/Chariot/crt_gimbal.cpp"
+          }
+        ],
+        "folders": []
+      },
+      {
+        "name": "Device",
+        "files": [
+          {
+            "path": "../User/Device/dvc_imu.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_boardc_bmi088.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_boardc_ist8310.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_djimotor.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_dmmotor.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_lkmotor.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_dr16.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_supercap.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_manifold.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_minipc.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_referee.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_sampler.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_serialplot.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_servo.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_witahrs.cpp"
+          },
+          {
+            "path": "../User/Device/dvc_dwt.cpp"
+          },
+          {
+            "path": "../User/Device/CharSendTask.c"
+          },
+          {
+            "path": "../User/Device/GraphicsSendTask.c"
+          },
+          {
+            "path": "../User/Device/ui.c"
+          },
+          {
+            "path": "../User/Device/dvc_GraphicsSendTask.c"
+          }
+        ],
+        "folders": []
       },
       {
         "name": "Interaction",
@@ -289,16 +293,16 @@
                 "path": "../User/Middleware/Algorithm/alg_fsm.cpp"
               },
               {
-                "path": "../User/Middleware/Algorithm/alg_MahonyAHRS.cpp"
-              },
-              {
                 "path": "../User/Middleware/Algorithm/alg_pid.cpp"
               },
               {
-                "path": "../User/Middleware/Algorithm/alg_power_limit.cpp"
+                "path": "../User/Middleware/Algorithm/alg_slope.cpp"
               },
               {
-                "path": "../User/Middleware/Algorithm/alg_slope.cpp"
+                "path": "../User/Middleware/Algorithm/user_lib.cpp"
+              },
+              {
+                "path": "../User/Middleware/Algorithm/QuaternionEKF.cpp"
               },
               {
                 "path": "../User/Middleware/Algorithm/kalman_filter.cpp"
@@ -307,10 +311,10 @@
                 "path": "../User/Middleware/Algorithm/PID.cpp"
               },
               {
-                "path": "../User/Middleware/Algorithm/QuaternionEKF.cpp"
+                "path": "../User/Middleware/Algorithm/alg_MahonyAHRS.cpp"
               },
               {
-                "path": "../User/Middleware/Algorithm/user_lib.cpp"
+                "path": "../User/Device/alg_power_limit.cpp"
               }
             ],
             "folders": []
@@ -325,13 +329,7 @@
                 "path": "../User/Middleware/Driver/drv_bsp-boarda.c"
               },
               {
-                "path": "../User/Middleware/Driver/drv_buzzer.c"
-              },
-              {
                 "path": "../User/Middleware/Driver/drv_can.c"
-              },
-              {
-                "path": "../User/Middleware/Driver/drv_dwt.c"
               },
               {
                 "path": "../User/Middleware/Driver/drv_i2c.c"
@@ -349,12 +347,24 @@
                 "path": "../User/Middleware/Driver/drv_uart.c"
               },
               {
+                "path": "../User/Middleware/Driver/drv_dwt.c"
+              },
+              {
                 "path": "../User/Middleware/Driver/drv_usb.c"
               }
             ],
             "folders": []
           }
         ]
+      },
+      {
+        "name": "Task",
+        "files": [
+          {
+            "path": "../User/Task/tsk_config_and_callback.cpp"
+          }
+        ],
+        "folders": []
       },
       {
         "name": "Middlewares",
@@ -381,12 +391,17 @@
         ]
       },
       {
-        "name": "Task",
+        "name": "Config",
         "files": [
           {
-            "path": "../User/Task/tsk_config_and_callback.cpp"
+            "path": "../User/Congfig/config.h"
           }
         ],
+        "folders": []
+      },
+      {
+        "name": "::CMSIS",
+        "files": [],
         "folders": []
       }
     ]
@@ -395,7 +410,7 @@
   "deviceName": null,
   "packDir": ".pack/Keil/STM32F4xx_DFP.1.0.8",
   "miscInfo": {
-    "uid": "ddc947ed0a225b1cca313610a830b98a"
+    "uid": "1309c5ab28cb4ed883195acd73c089e1"
   },
   "targets": {
     "infantry": {
@@ -404,8 +419,8 @@
       "compileConfig": {
         "cpuType": "Cortex-M4",
         "floatingPointHardware": "single",
-        "scatterFilePath": "",
         "useCustomScatterFile": false,
+        "scatterFilePath": "",
         "storageLayout": {
           "RAM": [
             {
@@ -519,17 +534,41 @@
         "bin": "",
         "baseAddr": "",
         "cpuInfo": {
-          "vendor": "null",
-          "cpuName": "null"
+          "vendor": "ST",
+          "cpuName": "STM32F407IG"
         },
         "proType": 1,
         "speed": 8000,
         "otherCmds": ""
       },
-      "uploadConfigMap": {},
+      "uploadConfigMap": {
+        "JLink": {
+          "bin": "",
+          "baseAddr": "",
+          "cpuInfo": {
+            "vendor": "ST",
+            "cpuName": "STM32F407IG"
+          },
+          "proType": 1,
+          "speed": 8000,
+          "otherCmds": ""
+        },
+        "STLink": {
+          "bin": "",
+          "proType": "SWD",
+          "resetMode": "default",
+          "runAfterProgram": true,
+          "speed": 4000,
+          "address": "0x8000000",
+          "elFile": "None",
+          "optionBytes": ".eide/infantry.st.option.bytes.ini",
+          "otherCmds": ""
+        }
+      },
       "custom_dep": {
         "name": "default",
         "incList": [
+          ".",
           "../Drivers/STM32F4xx_HAL_Driver/Inc",
           "../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy",
           "../Drivers/CMSIS/Device/ST/STM32F4xx/Include",
@@ -546,10 +585,10 @@
           "../Middlewares/ST/STM32_USB_Device_Library/Core/Inc",
           "../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc",
           "../Core/Inc",
+          "../User/Congfig",
           "RTE/_infantry"
         ],
         "libList": [],
-        "sourceDirList": [],
         "defineList": [
           "USE_HAL_DRIVER",
           "STM32F407xx",
@@ -563,5 +602,5 @@
       }
     }
   },
-  "version": "3.3"
+  "version": "3.4"
 }

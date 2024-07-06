@@ -176,36 +176,40 @@ void Class_LK_Motor::Data_Process()
     uint16_t tmp_encoder, tmp_omega, tmp_current;
     Struct_LK_Motor_CAN_Rx_Data *tmp_buffer = (Struct_LK_Motor_CAN_Rx_Data *)CAN_Manage_Object->Rx_Buffer.Data;
     
-
     //处理大小端
     Math_Endian_Reverse_16((void *)&tmp_buffer->Encoder_Reverse, &tmp_encoder);
     Math_Endian_Reverse_16((void *)&tmp_buffer->Omega_Reverse, &tmp_omega);
     Math_Endian_Reverse_16((void *)&tmp_buffer->Current_Reverse, &tmp_current);
 
     //计算圈数与总角度值
-    delta_encoder = tmp_encoder - Data.Pre_Encoder;
-
-    if (delta_encoder < -(Position_Max / 2))
+    if(Start_Flag==0)
     {
-        //正方向转过了一圈
-        Data.Total_Round++;
-    }
-    else if (delta_encoder > (Position_Max / 2))
-    {
-        //反方向转过了一圈
-        Data.Total_Round--;
+        delta_encoder = tmp_encoder - Data.Pre_Encoder;
+        if (delta_encoder < -(Position_Max / 2))
+        {
+            //正方向转过了一圈
+            Data.Total_Round++;
+        }
+        else if (delta_encoder > (Position_Max / 2))
+        {
+            //反方向转过了一圈
+            Data.Total_Round--;
+        }        
     }
     Data.Total_Encoder = Data.Total_Round * Position_Max + tmp_encoder + Position_Offset;
 
     //计算电机本身信息
     Data.CMD_ID = tmp_buffer->CMD_ID;
-    Data.Now_Angle = (float)Data.Total_Encoder / (float)Position_Max * 360.0f; 
+    Data.Now_Angle = (float)Data.Total_Encoder / (float)Position_Max *360.0f; 
+    Data.Now_Radian = Data.Now_Angle * DEG_TO_RAD;
+    Data.Now_Omega_Angle = tmp_omega * RPM_TO_DEG;
+    Data.Now_Omega_Radian = tmp_omega *RPM_TO_RADPS; 
     Data.Now_Current = Math_Int_To_Float(tmp_current, 0, (1 << 12) - 1, -Current_Max, Current_Max); 
-    Data.Now_Omega = tmp_omega *RPM_TO_RADPS; 
     Data.Now_Temperature = tmp_buffer->Temperature_Centigrade;  
 
     //存储预备信息
     Data.Pre_Encoder = tmp_encoder;
+    if(Start_Flag==0)   Start_Flag = 1;
 }
 
 void Class_LK_Motor::Output(void)
@@ -280,8 +284,8 @@ void Class_LK_Motor::TIM_Process_PeriodElapsedCallback()
         break;
         case (LK_Motor_Control_Method_OMEGA):
         {
-            PID_Omega.Set_Target(Target_Omega);
-            PID_Omega.Set_Now(Data.Now_Omega);
+            PID_Omega.Set_Target(Target_Omega_Angle);
+            PID_Omega.Set_Now(Data.Now_Omega_Angle);
             PID_Omega.TIM_Adjust_PeriodElapsedCallback();
 
             Target_Current = PID_Omega.Get_Out();
@@ -295,10 +299,10 @@ void Class_LK_Motor::TIM_Process_PeriodElapsedCallback()
             PID_Angle.Set_Now(Data.Now_Angle);
             PID_Angle.TIM_Adjust_PeriodElapsedCallback();
 
-            Target_Omega = PID_Angle.Get_Out();
+            Target_Omega_Angle = PID_Angle.Get_Out();
 
-            PID_Omega.Set_Target(Target_Omega);
-            PID_Omega.Set_Now(Data.Now_Omega);
+            PID_Omega.Set_Target(Target_Omega_Angle);
+            PID_Omega.Set_Now(Data.Now_Omega_Angle);
             PID_Omega.TIM_Adjust_PeriodElapsedCallback();
 
             Target_Current = PID_Omega.Get_Out();

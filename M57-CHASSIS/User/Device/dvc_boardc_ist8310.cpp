@@ -4,8 +4,8 @@
   * @file       IST8310driver.c/h
   * @brief      ist8310 is a 3-axis digital magnetometer, the file includes initialization function,
   *             read magnetic field strength data function.
-  *             IST8310??????????????????????????????????????????????????????
-  * @note       IST8310 only support I2C. IST8310????I2C??
+  *             IST8310��һ���������ִ����ƣ����ļ�������ʼ����������ȡ�ų����ݺ�����
+  * @note       IST8310 only support I2C. IST8310ֻ֧��I2C��
   * @history
   *  Version    Date            Author          Modification
   *  V1.0.0     Dec-26-2018     RM              1. done
@@ -45,9 +45,9 @@ void Class_BoardC_IST8310::ist8310_com_init(void)
   * @retval         value of the register
   */
 /**
-  * @brief          ???IST8310???????????I2C
-  * @param[in]      ????????
-  * @retval         ??????
+  * @brief          ��ȡIST8310��һ���ֽ�ͨ��I2C
+  * @param[in]      �Ĵ�����ַ
+  * @retval         �Ĵ���ֵ
   */
 uint8_t Class_BoardC_IST8310::ist8310_IIC_read_single_reg(uint8_t reg)
 {
@@ -65,9 +65,9 @@ uint8_t Class_BoardC_IST8310::ist8310_IIC_read_single_reg(uint8_t reg)
   * @retval         value of the register
   */
 /**
-  * @brief          ???I2C��?????????IST8310????????
-  * @param[in]      ????????
-  * @param[in]      ��???
+  * @brief          ͨ��I2Cд��һ���ֽڵ�IST8310�ļĴ�����
+  * @param[in]      �Ĵ�����ַ
+  * @param[in]      д��ֵ
   * @retval         none
   */
 void Class_BoardC_IST8310::ist8310_IIC_write_single_reg(uint8_t reg, uint8_t data)
@@ -84,10 +84,10 @@ void Class_BoardC_IST8310::ist8310_IIC_write_single_reg(uint8_t reg, uint8_t dat
   * @retval         none
   */
 /**
-  * @brief          ???IST8310??????????I2C
-  * @param[in]      ???????????
-  * @param[out]     ?????????
-  * @param[in]      ??????????
+  * @brief          ��ȡIST8310�Ķ���ֽ�ͨ��I2C
+  * @param[in]      �Ĵ�����ʼ��ַ
+  * @param[out]     ��ȡ������
+  * @param[in]      ��ȡ�ֽ�����
   * @retval         none
   */
 void Class_BoardC_IST8310::ist8310_IIC_read_muli_reg(uint8_t reg, uint8_t *buf, uint8_t len)
@@ -95,6 +95,7 @@ void Class_BoardC_IST8310::ist8310_IIC_read_muli_reg(uint8_t reg, uint8_t *buf, 
   IIC_Send_Receive_Data(IIC_Manage_Object->IIC_Handler, IST8310_IIC_ADDRESS <<1, reg, I2C_MEMADD_SIZE_8BIT, buf, len, 10, IIC_READ);
   //HAL_I2C_Mem_Read(&hi2c3, IST8310_IIC_ADDRESS <<1, reg,I2C_MEMADD_SIZE_8BIT,buf,len,10);
 }
+
 
 /**
   * @brief          write multiple byte of ist8310 by i2c
@@ -104,10 +105,10 @@ void Class_BoardC_IST8310::ist8310_IIC_read_muli_reg(uint8_t reg, uint8_t *buf, 
   * @retval         none
   */
 /**
-  * @brief          ��????????IST8310?????????I2C
-  * @param[in]      ???????????
-  * @param[out]     ?????????
-  * @param[in]      ??????????
+  * @brief          д�����ֽڵ�IST8310�ļĴ���ͨ��I2C
+  * @param[in]      �Ĵ�����ʼ��ַ
+  * @param[out]     ��ȡ������
+  * @param[in]      ��ȡ�ֽ�����
   * @retval         none
   */
 void Class_BoardC_IST8310::ist8310_IIC_write_muli_reg(uint8_t reg, uint8_t *data, uint8_t len)
@@ -122,8 +123,8 @@ void Class_BoardC_IST8310::ist8310_IIC_write_muli_reg(uint8_t reg, uint8_t *data
   * @retval         none
   */
 /**
-  * @brief          ???x????
-  * @param[in]      ms: ms????
+  * @brief          ��ʱx����
+  * @param[in]      ms: ms����
   * @retval         none
   */
 void Class_BoardC_IST8310::ist8310_delay_ms(uint16_t ms)
@@ -138,8 +139,8 @@ void Class_BoardC_IST8310::ist8310_delay_ms(uint16_t ms)
   * @retval         none
   */
 /**
-  * @brief          ???x???
-  * @param[in]      us: us???
+  * @brief          ��ʱx΢��
+  * @param[in]      us: us΢��
   * @retval         none
   */
 void Class_BoardC_IST8310::ist8310_delay_us(uint16_t us)
@@ -148,8 +149,7 @@ void Class_BoardC_IST8310::ist8310_delay_us(uint16_t us)
     uint32_t told = 0, tnow = 0, tcnt = 0;
     uint32_t reload = 0;
     reload = SysTick->LOAD;
-    // ticks = us * 72;
-    ticks = us * (SystemCoreClock / 1000000);
+    ticks = us * 72;
     told = SysTick->VAL;
     while (1)
     {
@@ -180,7 +180,7 @@ void Class_BoardC_IST8310::ist8310_delay_us(uint16_t us)
   * @retval         none
   */
 /**
-  * @brief          ????RSTN?????1
+  * @brief          ����RSTN����Ϊ1
   * @param[in]      none
   * @retval         none
   */
@@ -196,7 +196,7 @@ void Class_BoardC_IST8310::ist8310_RST_H(void)
   * @retval         none
   */
 /**
-  * @brief          ????RSTN?????0
+  * @brief          ����RSTN����Ϊ0
   * @param[in]      none
   * @retval         none
   */
@@ -212,7 +212,7 @@ void Class_BoardC_IST8310::ist8310_RST_L(void)
   * @retval         error value
   */
 /**
-  * @brief          ?????IST8310
+  * @brief          ��ʼ��IST8310
   * @param[in]      none
   * @retval         error value
   */
@@ -259,9 +259,9 @@ uint8_t Class_BoardC_IST8310::ist8310_init(void)
   * @retval         none
   */
 /**
-  * @brief          ?????????I2C??DMA???????????STAT1??DATAZL????????????????????????��???
-  * @param[in]      status_buf:???????,??STAT1(0x02) ??????? DATAZL(0x08)????? 
-  * @param[out]     ist8310_real_data:ist8310???????
+  * @brief          ����Ѿ�ͨ��I2C��DMA��ʽ��ȡ���˴�STAT1��DATAZL�����ݣ�����ʹ������������д���
+  * @param[in]      status_buf:����ָ��,��STAT1(0x02) �Ĵ����� DATAZL(0x08)�Ĵ��� 
+  * @param[out]     ist8310_real_data:ist8310�����ݽṹ
   * @retval         none
   */
 void Class_BoardC_IST8310::ist8310_read_over(uint8_t *status_buf, ist8310_real_data_t *ist8310_real_data)
@@ -291,8 +291,8 @@ void Class_BoardC_IST8310::ist8310_read_over(uint8_t *status_buf, ist8310_real_d
   * @retval         none
   */
 /**
-  * @brief          ?????????????
-  * @param[out]     ???????
+  * @brief          ͨ����ȡ�ų�����
+  * @param[out]     �ų�����
   * @retval         none
   */
 void Class_BoardC_IST8310::ist8310_read_mag(float mag[3])

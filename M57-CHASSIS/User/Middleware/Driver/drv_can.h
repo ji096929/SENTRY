@@ -97,8 +97,8 @@ extern uint8_t CAN2_0xxf7_Tx_Data[];
 extern uint8_t CAN2_0xxf8_Tx_Data[];
 
 extern uint8_t CAN_Supercap_Tx_Data[];
-extern uint8_t CAN2_Chassis_Tx_Data[];  //云台给底盘发送缓冲区
-extern uint8_t CAN2_Gimbal_Tx_Data[];   //底盘给云台发送缓冲区
+extern uint8_t CAN2_Gimbal_Tx_Chassis_Data[];  //云台给底盘发送缓冲区
+extern uint8_t CAN2_Chassis_Tx_Gimbal_Data[];   //底盘给云台发送缓冲区
 
 /*********LK电机 控制缓冲区***********/
 extern uint8_t CAN1_0x141_Tx_Data[8];
@@ -119,9 +119,6 @@ extern uint8_t CAN2_0x146_Tx_Data[8];
 extern uint8_t CAN2_0x147_Tx_Data[8];
 extern uint8_t CAN2_0x148_Tx_Data[8];
 
-extern uint8_t CAN2_0x150_Tx_Data[8];
-extern uint8_t CAN2_0x152_Tx_Data[8];
-extern uint8_t CAN2_0x153_Tx_Data[8];
 /* Exported function declarations ---------------------------------------------*/
 
 void CAN_Init(CAN_HandleTypeDef *hcan, CAN_Call_Back Callback_Function);

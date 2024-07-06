@@ -19,12 +19,15 @@
 #include "arm_math.h"
 #include "stdint.h"
 #include "float.h"
-#include "math.h"
 
 /* Exported macros -----------------------------------------------------------*/
 
 //RPM换算到rad/s
 #define RPM_TO_RADPS (2.0f * PI / 60.0f)
+
+//RPM换算到角度/s
+#define RPM_TO_DEG (360.0f / 60.0f)
+
 //deg换算到rad
 #define DEG_TO_RAD (PI / 180.0f)
 //摄氏度换算到开氏度

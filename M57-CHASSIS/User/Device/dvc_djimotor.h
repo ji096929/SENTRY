@@ -19,9 +19,7 @@
 #include "alg_power_limit.h"
 
 /* Exported macros -----------------------------------------------------------*/
-//弧度转化
-#define RADPS_TO_RPM(x) ((x) * (60.0f / (2.0f * PI)))
-#define RAD_TO_ANGEL(x) ((x) * (180.0f / PI))
+
 /* Exported types ------------------------------------------------------------*/
 
 /**
@@ -87,13 +85,16 @@ struct Struct_DJI_Motor_CAN_Data
  */
 struct Struct_DJI_Motor_Data
 {
-    float Now_Angle;
-    float Now_Omega;
+    float Now_Angle;  //输出轴多圈角度（角度制）
+    float Now_Radian;   //输出轴多圈角度（弧度制）
+    float Now_Omega_Radian; //输出轴角速度（弧度制）
+    float Now_Omega_Angle;  //输出轴角速度（角度制）
     float Now_Torque;
     float Now_Temperature;
     uint32_t Pre_Encoder;
     int32_t Total_Encoder;
     int32_t Total_Round;
+    int32_t Pre_Total_Encoder;
 };
 
 /**
@@ -115,18 +116,24 @@ public:
     inline uint16_t Get_Output_Max();
     inline Enum_DJI_Motor_Status Get_DJI_Motor_Status();
     inline float Get_Now_Angle();
-    inline float Get_Now_Omega();
+    inline float Get_Now_Radian();
+    inline float Get_Now_Omega_Angle();
+    inline float Get_Now_Omega_Radian();
     inline float Get_Now_Torque();
     inline uint8_t Get_Now_Temperature();
     inline Enum_DJI_Motor_Control_Method Get_Control_Method();
     inline float Get_Target_Angle();
-    inline float Get_Target_Omega();
+    inline float Get_Target_Radian();
+    inline float Get_Target_Omega_Radian();
+    inline float Get_Target_Omega_Angle();
     inline float Get_Target_Torque();
     inline float Get_Out();
 
     inline void Set_DJI_Motor_Control_Method(Enum_DJI_Motor_Control_Method __DJI_Motor_Control_Method);
     inline void Set_Target_Angle(float __Target_Angle);
-    inline void Set_Target_Omega(float __Target_Omega);
+    inline void Set_Target_Radian(float __Target_Radian);
+    inline void Set_Target_Omega_Angle(float __Target_Omega_Angle);
+    inline void Set_Target_Omega_Radian(float __Target_Omega_Radian);
     inline void Set_Target_Torque(float __Target_Torque);
     inline void Set_Out(float __Out);
 
@@ -149,7 +156,8 @@ protected:
     float Omega_Max;
 
     //常量
-
+    //电机上电第一帧标志位
+    uint8_t Start_Falg = 0;
     //一圈编码器刻度
     uint16_t Encoder_Num_Per_Round = 8192;
     //最大输出电压
@@ -175,10 +183,14 @@ protected:
 
     //电机控制方式
     Enum_DJI_Motor_Control_Method DJI_Motor_Control_Method = DJI_Motor_Control_Method_IMU_ANGLE;
-    //目标的角度, 度数
+    //目标的角度, °
     float Target_Angle = 0.0f;
-    //目标的速度, rpm
-    float Target_Omega = 0.0f;
+    //目标的速度, °/s
+    float Target_Omega_Angle = 0.0f;
+    //目标的角度, rad
+    float Target_Radian = 0.0f;
+    //目标的速度, rad/s
+    float Target_Omega_Radian = 0.0f;
     //目标的扭矩, 直接采用反馈值
     float Target_Torque = 0.0f;
     //输出量
@@ -207,18 +219,24 @@ public:
     inline uint16_t Get_Output_Max();
     inline Enum_DJI_Motor_Status Get_DJI_Motor_Status();
     inline float Get_Now_Angle();
-    inline float Get_Now_Omega();
+    inline float Get_Now_Radian();
+    inline float Get_Now_Omega_Angle();
+    inline float Get_Now_Omega_Radian();
     inline float Get_Now_Torque();
     inline uint8_t Get_Now_Temperature();
     inline Enum_DJI_Motor_Control_Method Get_Control_Method();
     inline float Get_Target_Angle();
-    inline float Get_Target_Omega();
+    inline float Get_Target_Radian();
+    inline float Get_Target_Omega_Radian();
+    inline float Get_Target_Omega_Angle();
     inline float Get_Target_Torque();
     inline float Get_Out();
 
     inline void Set_DJI_Motor_Control_Method(Enum_DJI_Motor_Control_Method __Control_Method);
     inline void Set_Target_Angle(float __Target_Angle);
-    inline void Set_Target_Omega(float __Target_Omega);
+    inline void Set_Target_Radian(float __Target_Radian);
+    inline void Set_Target_Omega_Angle(float __Target_Omega_Angle);
+    inline void Set_Target_Omega_Radian(float __Target_Omega_Radian);
     inline void Set_Target_Torque(float __Target_Torque);
     inline void Set_Out(float __Out);
 
@@ -241,7 +259,8 @@ protected:
     float Torque_Max;
 
     //常量
-
+    //电机上电第一帧标志位
+    uint8_t Start_Falg = 0;
     //一圈编码器刻度
     uint16_t Encoder_Num_Per_Round = 8192;
     //最大输出扭矩
@@ -267,10 +286,14 @@ protected:
 
     //电机控制方式
     Enum_DJI_Motor_Control_Method DJI_Motor_Control_Method = DJI_Motor_Control_Method_ANGLE;
-    //目标的角度, rad
+    //目标的角度, °
     float Target_Angle = 0.0f;
+    //目标的速度, °/s
+    float Target_Omega_Angle = 0.0f;
+    //目标的角度, rad
+    float Target_Radian = 0.0f;
     //目标的速度, rad/s
-    float Target_Omega = 0.0f;
+    float Target_Omega_Radian = 0.0f;
     //目标的扭矩, 直接采用反馈值
     float Target_Torque = 0.0f;
     //输出量
@@ -302,18 +325,24 @@ public:
     inline uint16_t Get_Output_Max();
     inline Enum_DJI_Motor_Status Get_DJI_Motor_Status();
     inline float Get_Now_Angle();
-    inline float Get_Now_Omega();
+    inline float Get_Now_Radian();
+    inline float Get_Now_Omega_Angle();
+    inline float Get_Now_Omega_Radian();
     inline float Get_Now_Torque();
     inline uint8_t Get_Now_Temperature();
     inline Enum_DJI_Motor_Control_Method Get_Control_Method();
     inline float Get_Target_Angle();
-    inline float Get_Target_Omega();
+    inline float Get_Target_Radian();
+    inline float Get_Target_Omega_Radian();
+    inline float Get_Target_Omega_Angle();
     inline float Get_Target_Torque();
     inline float Get_Out();
 
     inline void Set_DJI_Motor_Control_Method(Enum_DJI_Motor_Control_Method __Control_Method);
     inline void Set_Target_Angle(float __Target_Angle);
-    inline void Set_Target_Omega(float __Target_Omega);
+    inline void Set_Target_Radian(float __Target_Radian);
+    inline void Set_Target_Omega_Angle(float __Target_Omega_Angle);
+    inline void Set_Target_Omega_Radian(float __Target_Omega_Radian);
     inline void Set_Target_Torque(float __Target_Torque);
     inline void Set_Out(float __Out);
 
@@ -337,6 +366,8 @@ protected:
 
     //常量
 
+    //电机上电第一帧标志位
+    uint8_t Start_Falg = 0;
     //一圈编码器刻度
     uint16_t Encoder_Num_Per_Round = 8192;
     //最大输出扭矩
@@ -362,10 +393,14 @@ protected:
 
     //电机控制方式
     Enum_DJI_Motor_Control_Method DJI_Motor_Control_Method = DJI_Motor_Control_Method_ANGLE;
-    //目标的角度, rad
+    //目标的角度, °
     float Target_Angle = 0.0f;
+    //目标的速度, °/s
+    float Target_Omega_Angle = 0.0f;
+    //目标的角度, rad
+    float Target_Radian = 0.0f;
     //目标的速度, rad/s
-    float Target_Omega = 0.0f;
+    float Target_Omega_Radian = 0.0f;
     //目标的扭矩, 直接采用反馈值
     float Target_Torque = 0.0f;
     //输出量
@@ -402,9 +437,9 @@ Enum_DJI_Motor_Status Class_DJI_Motor_GM6020::Get_DJI_Motor_Status()
 }
 
 /**
- * @brief 获取当前的角度, rad
+ * @brief 获取当前的角度, °
  *
- * @return float 当前的角度, rad
+ * @return float 当前的角度, °
  */
 float Class_DJI_Motor_GM6020::Get_Now_Angle()
 {
@@ -412,13 +447,33 @@ float Class_DJI_Motor_GM6020::Get_Now_Angle()
 }
 
 /**
+ * @brief 获取当前的角度, rad
+ *
+ * @return float 当前的角度, rad
+ */
+float Class_DJI_Motor_GM6020::Get_Now_Radian()
+{
+    return (Data.Now_Radian);
+}
+
+/**
+ * @brief 获取当前的速度, °/s
+ *
+ * @return float 当前的速度, °/s
+ */
+float Class_DJI_Motor_GM6020::Get_Now_Omega_Angle()
+{
+    return (Data.Now_Omega_Angle);
+}
+
+/**
  * @brief 获取当前的速度, rad/s
  *
  * @return float 当前的速度, rad/s
  */
-float Class_DJI_Motor_GM6020::Get_Now_Omega()
+float Class_DJI_Motor_GM6020::Get_Now_Omega_Radian()
 {
-    return (Data.Now_Omega);
+    return (Data.Now_Omega_Radian);
 }
 
 /**
@@ -456,6 +511,16 @@ Enum_DJI_Motor_Control_Method Class_DJI_Motor_GM6020::Get_Control_Method()
  *
  * @return float 目标的角度, rad
  */
+float Class_DJI_Motor_GM6020::Get_Target_Radian()
+{
+    return (Target_Radian);
+}
+
+/**
+ * @brief 获取目标的角度, °
+ *
+ * @return float 目标的角度, °
+ */
 float Class_DJI_Motor_GM6020::Get_Target_Angle()
 {
     return (Target_Angle);
@@ -466,9 +531,19 @@ float Class_DJI_Motor_GM6020::Get_Target_Angle()
  *
  * @return float 目标的速度, rad/s
  */
-float Class_DJI_Motor_GM6020::Get_Target_Omega()
+float Class_DJI_Motor_GM6020::Get_Target_Omega_Radian()
 {
-    return (Target_Omega);
+    return (Target_Omega_Radian);
+}
+
+/**
+ * @brief 获取目标的速度, °/s
+ *
+ * @return float 目标的速度, °/s
+ */
+float Class_DJI_Motor_GM6020::Get_Target_Omega_Angle()
+{
+    return (Target_Omega_Angle);
 }
 
 /**
@@ -506,6 +581,16 @@ void Class_DJI_Motor_GM6020::Set_DJI_Motor_Control_Method(Enum_DJI_Motor_Control
  *
  * @param __Target_Angle 目标的角度, rad
  */
+void Class_DJI_Motor_GM6020::Set_Target_Radian(float __Target_Radian)
+{
+    Target_Radian = __Target_Radian;
+}
+
+/**
+ * @brief 设定目标的角度, °
+ *
+ * @param __Target_Angle 目标的角度, °
+ */
 void Class_DJI_Motor_GM6020::Set_Target_Angle(float __Target_Angle)
 {
     Target_Angle = __Target_Angle;
@@ -516,9 +601,19 @@ void Class_DJI_Motor_GM6020::Set_Target_Angle(float __Target_Angle)
  *
  * @param __Target_Omega 目标的速度, rad/s
  */
-void Class_DJI_Motor_GM6020::Set_Target_Omega(float __Target_Omega)
+void Class_DJI_Motor_GM6020::Set_Target_Omega_Radian(float __Target_Omega_Radian)
 {
-    Target_Omega = __Target_Omega;
+    Target_Omega_Radian = __Target_Omega_Radian;
+}
+
+/**
+ * @brief 设定目标的速度, °/s
+ *
+ * @param __Target_Omega 目标的速度, °/s
+ */
+void Class_DJI_Motor_GM6020::Set_Target_Omega_Angle(float __Target_Omega_Angle)
+{
+    Target_Omega_Angle = __Target_Omega_Angle;
 }
 
 /**
@@ -562,9 +657,9 @@ Enum_DJI_Motor_Status Class_DJI_Motor_C610::Get_DJI_Motor_Status()
 }
 
 /**
- * @brief 获取当前的角度, rad
+ * @brief 获取当前的角度, °
  *
- * @return float 当前的角度, rad
+ * @return float 当前的角度, °
  */
 float Class_DJI_Motor_C610::Get_Now_Angle()
 {
@@ -572,13 +667,33 @@ float Class_DJI_Motor_C610::Get_Now_Angle()
 }
 
 /**
+ * @brief 获取当前的角度, rad
+ *
+ * @return float 当前的角度, rad
+ */
+float Class_DJI_Motor_C610::Get_Now_Radian()
+{
+    return (Data.Now_Radian);
+}
+
+/**
  * @brief 获取当前的速度, rad/s
  *
  * @return float 当前的速度, rad/s
  */
-float Class_DJI_Motor_C610::Get_Now_Omega()
+float Class_DJI_Motor_C610::Get_Now_Omega_Radian()
 {
-    return (Data.Now_Omega);
+    return (Data.Now_Omega_Radian);
+}
+
+/**
+ * @brief 获取当前的速度, °/s
+ *
+ * @return float 当前的速度, °/s
+ */
+float Class_DJI_Motor_C610::Get_Now_Omega_Angle()
+{
+    return (Data.Now_Omega_Angle);
 }
 
 /**
@@ -612,9 +727,9 @@ Enum_DJI_Motor_Control_Method Class_DJI_Motor_C610::Get_Control_Method()
 }
 
 /**
- * @brief 获取目标的角度, rad
+ * @brief 获取目标的角度, °
  *
- * @return float 目标的角度, rad
+ * @return float 目标的角度, °
  */
 float Class_DJI_Motor_C610::Get_Target_Angle()
 {
@@ -622,13 +737,33 @@ float Class_DJI_Motor_C610::Get_Target_Angle()
 }
 
 /**
- * @brief 获取目标的速度, rad/s
+ * @brief 获取目标的角度, °
  *
- * @return float 目标的速度, rad/s
+ * @return float 目标的角度, °
  */
-float Class_DJI_Motor_C610::Get_Target_Omega()
+float Class_DJI_Motor_C610::Get_Target_Radian()
 {
-    return (Target_Omega);
+    return (Target_Radian);
+}
+
+/**
+ * @brief 获取目标的速度, °/s
+ *
+ * @return float 目标的速度, °/s
+ */
+float Class_DJI_Motor_C610::Get_Target_Omega_Angle()
+{
+    return (Target_Omega_Angle);
+}
+
+/**
+ * @brief 获取目标的速度, rad/s  
+ *
+ * @return float 目标的速度, rad/s 
+ */
+float Class_DJI_Motor_C610::Get_Target_Omega_Radian()
+{
+    return (Target_Omega_Radian);
 }
 
 /**
@@ -662,9 +797,9 @@ void Class_DJI_Motor_C610::Set_DJI_Motor_Control_Method(Enum_DJI_Motor_Control_M
 }
 
 /**
- * @brief 设定目标的角度, rad
+ * @brief 设定目标的角度, °
  *
- * @param __Target_Angle 目标的角度, rad
+ * @param __Target_Angle 目标的角度, °
  */
 void Class_DJI_Motor_C610::Set_Target_Angle(float __Target_Angle)
 {
@@ -672,13 +807,33 @@ void Class_DJI_Motor_C610::Set_Target_Angle(float __Target_Angle)
 }
 
 /**
+ * @brief 设定目标的角度, rad
+ *
+ * @param __Target_Angle 目标的角度, rad
+ */
+void Class_DJI_Motor_C610::Set_Target_Radian(float __Target_Radian)
+{
+    Target_Radian = __Target_Radian;
+}
+
+/**
  * @brief 设定目标的速度, rad/s
  *
  * @param __Target_Omega 目标的速度, rad/s
  */
-void Class_DJI_Motor_C610::Set_Target_Omega(float __Target_Omega)
+void Class_DJI_Motor_C610::Set_Target_Omega_Radian(float __Target_Omega_Radian)
 {
-    Target_Omega = __Target_Omega;
+    Target_Omega_Radian = __Target_Omega_Radian;
+}
+
+/**
+ * @brief 设定目标的速度, °/s
+ *
+ * @param __Target_Omega 目标的速度, °/s
+ */
+void Class_DJI_Motor_C610::Set_Target_Omega_Angle(float __Target_Omega_Angle)
+{
+    Target_Omega_Angle = __Target_Omega_Angle;
 }
 
 /**
@@ -722,9 +877,9 @@ Enum_DJI_Motor_Status Class_DJI_Motor_C620::Get_DJI_Motor_Status()
 }
 
 /**
- * @brief 获取当前的角度, rad
+ * @brief 获取当前的角度, °
  *
- * @return float 当前的角度, rad
+ * @return float 当前的角度, °
  */
 float Class_DJI_Motor_C620::Get_Now_Angle()
 {
@@ -732,13 +887,33 @@ float Class_DJI_Motor_C620::Get_Now_Angle()
 }
 
 /**
+ * @brief 获取当前的角度, rad
+ *
+ * @return float 当前的角度, rad
+ */
+float Class_DJI_Motor_C620::Get_Now_Radian()
+{
+    return (Data.Now_Radian);
+}
+
+/**
  * @brief 获取当前的速度, rad/s
  *
  * @return float 当前的速度, rad/s
  */
-float Class_DJI_Motor_C620::Get_Now_Omega()
+float Class_DJI_Motor_C620::Get_Now_Omega_Radian()
 {
-    return (Data.Now_Omega);
+    return (Data.Now_Omega_Radian);
+}
+
+/**
+ * @brief 获取当前的速度, °/s
+ *
+ * @return float 当前的速度, °/s
+ */
+float Class_DJI_Motor_C620::Get_Now_Omega_Angle()
+{
+    return (Data.Now_Omega_Angle);
 }
 
 /**
@@ -772,9 +947,9 @@ Enum_DJI_Motor_Control_Method Class_DJI_Motor_C620::Get_Control_Method()
 }
 
 /**
- * @brief 获取目标的角度, rad
+ * @brief 获取目标的角度, °
  *
- * @return float 目标的角度, rad
+ * @return float 目标的角度, °
  */
 float Class_DJI_Motor_C620::Get_Target_Angle()
 {
@@ -782,13 +957,33 @@ float Class_DJI_Motor_C620::Get_Target_Angle()
 }
 
 /**
+ * @brief 获取目标的角度, rad
+ *
+ * @return float 目标的角度, rad
+ */
+float Class_DJI_Motor_C620::Get_Target_Radian()
+{
+    return (Target_Radian);
+}
+
+/**
  * @brief 获取目标的速度, rad/s
  *
  * @return float 目标的速度, rad/s
  */
-float Class_DJI_Motor_C620::Get_Target_Omega()
+float Class_DJI_Motor_C620::Get_Target_Omega_Radian()
 {
-    return (Target_Omega);
+    return (Target_Omega_Radian);
+}
+
+/**
+ * @brief 获取目标的速度, °/s
+ *
+ * @return float 目标的速度, °/s
+ */
+float Class_DJI_Motor_C620::Get_Target_Omega_Angle()
+{
+    return (Target_Omega_Angle);
 }
 
 /**
@@ -822,9 +1017,9 @@ void Class_DJI_Motor_C620::Set_DJI_Motor_Control_Method(Enum_DJI_Motor_Control_M
 }
 
 /**
- * @brief 设定目标的角度, rad
+ * @brief 设定目标的角度, °
  *
- * @param __Target_Angle 目标的角度, rad
+ * @param __Target_Angle 目标的角度, °
  */
 void Class_DJI_Motor_C620::Set_Target_Angle(float __Target_Angle)
 {
@@ -832,13 +1027,33 @@ void Class_DJI_Motor_C620::Set_Target_Angle(float __Target_Angle)
 }
 
 /**
+ * @brief 设定目标的角度, rad
+ *
+ * @param __Target_Angle 目标的角度, rad
+ */
+void Class_DJI_Motor_C620::Set_Target_Radian(float __Target_Radian)
+{
+    Target_Radian = __Target_Radian;
+}
+
+/**
  * @brief 设定目标的速度, rad/s
  *
  * @param __Target_Omega 目标的速度, rad/s
  */
-void Class_DJI_Motor_C620::Set_Target_Omega(float __Target_Omega)
+void Class_DJI_Motor_C620::Set_Target_Omega_Radian(float __Target_Omega_Radian)
 {
-    Target_Omega = __Target_Omega;
+    Target_Omega_Radian = __Target_Omega_Radian;
+}
+
+/**
+ * @brief 设定目标的速度, °/s
+ *
+ * @param __Target_Omega 目标的速度, °/s
+ */
+void Class_DJI_Motor_C620::Set_Target_Omega_Angle(float __Target_Omega_Angle)
+{
+    Target_Omega_Angle = __Target_Omega_Angle;
 }
 
 /**

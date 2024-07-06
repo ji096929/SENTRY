@@ -1,9 +1,9 @@
 /**
  * @file drv_uart.h
  * @author yssickjgd (1345578933@qq.com)
- * @brief ï¿½ï¿½ï¿½ï¿½SCUT-Robotlabï¿½ï¿½Ð´ï¿½ï¿½UARTÍ¨ï¿½Å³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * @brief ·ÂÕÕSCUT-Robotlab¸ÄÐ´µÄUARTÍ¨ÐÅ³õÊ¼»¯ÓëÅäÖÃÁ÷³Ì
  * @version 0.1
- * @date 2023-08-29 0.1 23ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * @date 2023-08-29 0.1 23Èü¼¾¶¨¸å
  *
  * @copyright USTC-RoboWalker (c) 2022
  *
@@ -18,21 +18,21 @@
 
 /* Exported macros -----------------------------------------------------------*/
 
-// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö½Ú³ï¿½ï¿½ï¿½
+// »º³åÇø×Ö½Ú³¤¶È
 #define USB_BUFFER_SIZE 48
 
 /* Exported types ------------------------------------------------------------*/
 
 
 /**
- * @brief USBÍ¨ï¿½Å½ï¿½ï¿½Õ»Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * @brief USBÍ¨ÐÅ½ÓÊÕ»Øµ÷º¯ÊýÊý¾ÝÀàÐÍ
  *
  */
 typedef void (*USB_Call_Back)(uint8_t *Buffer, uint32_t Length);
 
 
 /**
- * @brief USBÍ¨ï¿½Å´ï¿½ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½
+ * @brief USBÍ¨ÐÅ´¦Àí½á¹¹Ìå
  *
  */
 struct Struct_USB_Manage_Object
@@ -40,8 +40,8 @@ struct Struct_USB_Manage_Object
     uint8_t Tx_Buffer[USB_BUFFER_SIZE];
     uint8_t Rx_Buffer[USB_BUFFER_SIZE];
     uint16_t Rx_Buffer_Length;
-	uint16_t Tx_Buffer_Length;
-	USB_Call_Back Callback_Function;
+	  uint16_t Tx_Buffer_Length;
+	  USB_Call_Back Callback_Function;
 };
 
 /* Exported variables --------------------------------------------------------*/
