@@ -219,7 +219,7 @@ void Class_DJI_Motor_GM6020::Data_Process()
     tmp_encoder = (CAN_Manage_Object->Rx_Buffer.Data[0] << 8) | CAN_Manage_Object->Rx_Buffer.Data[1];
     // 计算电机本身信息
     // Data.Now_Angle = (float)Data.Total_Encoder / (float)Encoder_Num_Per_Round * 2.0f * PI;
-    Data.Now_Angle = tmp_encoder / 8191.0 * 2 * PI;
+    Data.Now_Angle = ((tmp_encoder) / 8191.0 * 2 * PI);
     Data.Now_Omega = (float)tmp_omega * RPM_TO_RADPS;
     Data.Now_Torque = tmp_torque;
     // Data.Now_Temperature = tmp_temperature;

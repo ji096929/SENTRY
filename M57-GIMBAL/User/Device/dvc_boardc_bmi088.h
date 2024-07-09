@@ -62,9 +62,9 @@
 #define gNORM 9.876785f
 #endif
 
-#define SELF_GxOFFSET 0.0
-#define SELF_GyOFFSET 0.0
-#define SELF_GzOFFSET 0.0
+#define SELF_GxOFFSET  0.00422824966
+#define SELF_GyOFFSET -0.000368153909
+#define SELF_GzOFFSET -0.000333000149
 #define SELF_gNORM    9.78985268
 
 typedef struct

@@ -17,7 +17,7 @@
 #include "alg_pid.h"
 #include "drv_can.h"
 #include "alg_power_limit.h"
-
+#include "alg_filter.h"
 /* Exported macros -----------------------------------------------------------*/
 //弧度转化
 #define RADPS_TO_RPM(x) ((x) * (60.0f / (2.0f * PI)))
@@ -109,6 +109,7 @@ public:
     Class_PID PID_Omega;
     // PID扭矩环控制
     Class_PID PID_Torque;
+    Class_Filter_Fourier Filter_Fourier;
 
     void Init(CAN_HandleTypeDef *__hcan, Enum_DJI_Motor_ID __CAN_ID, Enum_DJI_Motor_Control_Method __Control_Method = DJI_Motor_Control_Method_ANGLE, int32_t __Encoder_Offset = 0, float __Omega_Max = 320.0f * RPM_TO_RADPS);
 

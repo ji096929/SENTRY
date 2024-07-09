@@ -84,8 +84,8 @@ protected:
 
     //输出值
     double Out = 0.0f;
-
-    //写变量
+    double I_out = 0.0f;
+    // 写变量
 
     // PID的P
     double K_P = 0.0f;

@@ -39,15 +39,15 @@ typedef enum
  * @brief 底盘控制类型
  *
  */
-enum Enum_Chassis_Control_Type :uint8_t
+enum Enum_Chassis_Control_Type : uint8_t
 {
-    Chassis_Control_Type_FLLOW      = 1,
-    Chassis_Control_Type_SPIN       = 2,
-    Chassis_Control_Type_OPPO_SPIN  = 3,
-    Chassis_Control_Type_DISABLE    = 4,
-    Chassis_Control_Type_NORMAL     = 5,
-    Chassis_Control_Type_NORMAL_SPIN= 6,
-    Chassis_Control_Type_FOLLOW_SPIN= 7,
+    Chassis_Control_Type_FLLOW = 1,
+    Chassis_Control_Type_SPIN = 2,
+    Chassis_Control_Type_ANTI_SPIN = 3,
+    Chassis_Control_Type_DISABLE = 4,
+    Chassis_Control_Type_NORMAL = 5,
+    Chassis_Control_Type_NORMAL_SPIN = 6,
+    Chassis_Control_Type_FOLLOW_SPIN = 7,
 };
 
 /**
@@ -75,8 +75,10 @@ public:
     //下方转动电机
     Class_DJI_Motor_C620 Motor_Wheel[4];
 
+    Class_PID Chassis_Follow_PID_Angle;
 
-    void Init(float __Velocity_X_Max = 4.0f, float __Velocity_Y_Max = 4.0f, float __Omega_Max = 4.0f, float __Steer_Power_Ratio = 0.5);
+    void
+    Init(float __Velocity_X_Max = 4.0f, float __Velocity_Y_Max = 4.0f, float __Omega_Max = 4.0f, float __Steer_Power_Ratio = 0.5);
 
     inline Enum_Chassis_Control_Type Get_Chassis_Control_Type();
     inline float Get_Velocity_X_Max();

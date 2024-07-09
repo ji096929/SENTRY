@@ -75,6 +75,7 @@ void Class_Tricycle_Chassis::Init(float __Velocity_X_Max, float __Velocity_Y_Max
 float temp_test_1,temp_test_2,temp_test_3,temp_test_4;
 void Class_Tricycle_Chassis::Speed_Resolution(){
     //获取当前速度值，用于速度解算初始值获取
+    Set_Chassis_Control_Type(Chassis_Control_Type_FLLOW);
     switch (Chassis_Control_Type)
     {
         case (Chassis_Control_Type_DISABLE):
@@ -124,18 +125,19 @@ void Class_Tricycle_Chassis::Speed_Resolution(){
             float motor3_temp_linear_vel = Target_Velocity_Y + Target_Velocity_X + Target_Omega*(HALF_WIDTH+HALF_LENGTH);
             float motor4_temp_linear_vel = Target_Velocity_Y - Target_Velocity_X - Target_Omega*(HALF_WIDTH+HALF_LENGTH);
             #endif            
-            //线速度 cm/s  转角速度  RAD 
-            float motor1_temp_rad = motor1_temp_linear_vel * VEL2RAD;
-            float motor2_temp_rad = motor2_temp_linear_vel * VEL2RAD;
-            float motor3_temp_rad = motor3_temp_linear_vel * VEL2RAD;
-            float motor4_temp_rad = motor4_temp_linear_vel * VEL2RAD;
+            //线速度 cm/s  转角速度  RAD
+            float motor1_temp_rad = motor1_temp_linear_vel * VEL2RAD * TRANS;
+            float motor2_temp_rad = motor2_temp_linear_vel * VEL2RAD * TRANS;
+            float motor3_temp_rad = motor3_temp_linear_vel * VEL2RAD * TRANS;
+            float motor4_temp_rad = motor4_temp_linear_vel * VEL2RAD * TRANS;
             //角速度*减速比  设定目标 直接给到电机输出轴
             Motor_Wheel[0].Set_Target_Omega_Radian(  motor2_temp_rad);
             Motor_Wheel[1].Set_Target_Omega_Radian(- motor1_temp_rad);
             Motor_Wheel[2].Set_Target_Omega_Radian(- motor3_temp_rad);
             Motor_Wheel[3].Set_Target_Omega_Radian(  motor4_temp_rad);
             //各个电机具体PID
-            for (int i = 0; i < 4; i++){
+            for (int i = 0; i < 4; i++)
+            {
                 Motor_Wheel[i].TIM_PID_PeriodElapsedCallback();
             }
             //            Motor_Wheel[0].Set_Target_Omega_Radian(  temp_test_1);
@@ -177,13 +179,12 @@ void Class_Tricycle_Chassis::TIM_Calculate_PeriodElapsedCallback(Enum_Sprint_Sta
     #endif
     //速度解算
     Speed_Resolution();
-
-    #ifdef POWER_LIMIT
+#ifdef POWER_LIMIT
     
     /****************************超级电容***********************************/
     Supercap.Set_Now_Power(Referee->Get_Chassis_Power());
     if(Referee->Get_Referee_Status()==Referee_Status_DISABLE)
-        Supercap.Set_Limit_Power(45.0f);
+        Supercap.Set_Limit_Power(100.0f);
     else
     {
         float offset;
@@ -203,7 +204,7 @@ void Class_Tricycle_Chassis::TIM_Calculate_PeriodElapsedCallback(Enum_Sprint_Sta
     {
         Power_Limit.Set_Power_Limit(Referee->Get_Chassis_Power_Max());
     }
-    //Power_Limit.Set_Power_Limit(45.0f);
+    Power_Limit.Set_Power_Limit(100.0f);
     Power_Limit.Set_Motor(Motor_Wheel);   //添加四个电机的控制电流和当前转速
     Power_Limit.Set_Chassis_Buffer(Referee->Get_Chassis_Energy_Buffer());
 

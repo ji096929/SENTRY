@@ -340,7 +340,7 @@ void Task1ms_TIM5_Callback()
     if (start_flag == 0 && init_finished % 1500 == 0) // 蜂鸣器：校验未完成
         buzzer_setTask(&buzzer, BUZZER_CALIBRATING_PRIORITY);
 
-    if (init_finished > 1000) // 等待IMU稳定后开始控制
+    if (init_finished > 0) // 等待IMU稳定后开始控制
         start_flag = 1;
 
     /************ 判断设备在线状态判断 50ms (所有device:电机，遥控器，裁判系统等) ***************/

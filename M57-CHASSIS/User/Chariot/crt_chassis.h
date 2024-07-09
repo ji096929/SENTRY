@@ -83,7 +83,7 @@ public:
     //下方转动电机
     Class_DJI_Motor_C620 Motor_Wheel[4];
 
-    void Init(float __Velocity_X_Max = 4.0f, float __Velocity_Y_Max = 4.0f, float __Omega_Max = 8.0f, float __Steer_Power_Ratio = 0.5);
+    void Init(float __Velocity_X_Max = 450.0f, float __Velocity_Y_Max = 450.0f, float __Omega_Max = 1000.0f, float __Steer_Power_Ratio = 0.5);
 
     inline Enum_Chassis_Control_Type Get_Chassis_Control_Type();
     inline float Get_Velocity_X_Max();
@@ -218,7 +218,9 @@ const float VEL2RPM = 1.240168f;
 const float VEL2RAD = 1.0f/(WHELL_DIAMETER/2.0f);
 
 //齿轮箱减速比;	
-const float M3508_REDUCTION_RATIO = 13.733f;	
+const float M3508_REDUCTION_RATIO = 13.733f;
+
+const float TRANS = 4/450.0f;
 /* Exported function declarations --------------------------------------------*/
 
 /**

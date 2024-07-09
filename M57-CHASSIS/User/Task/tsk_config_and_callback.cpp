@@ -119,22 +119,12 @@ void Chassis_Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
 {
     switch (CAN_RxMessage->Header.StdId)
     {
-    case (0x208):  //留给yaw电机编码器回传 用于底盘随动
-    {
-        chariot.Motor_Yaw.CAN_RxCpltCallback(CAN_RxMessage->Data);
-    }
-    break;
-    case (0x77):  //留给上板通讯
+    case (0x150):  //留给上板通讯
     {
         chariot.CAN_Chassis_Rx_Gimbal_Callback();
     }
     break;
-    case (0x67):  //留给超级电容
-    {
-        chariot.Chassis.Supercap.CAN_RxCpltCallback(CAN_RxMessage->Data);
-    }
-    break;
-    case (0x205):
+    case (0x152):
     {
         
     }

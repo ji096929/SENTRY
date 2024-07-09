@@ -221,7 +221,7 @@ public:
     void Init();
 
     void Calculate_Total_Angle();
-
+    inline float Get_Gimbal_Head_Angle();
     inline float Get_Target_Yaw_Angle();
     inline float Get_Target_Pitch_Angle();
     inline Enum_Gimbal_Control_Type Get_Gimbal_Control_Type();
@@ -233,7 +233,7 @@ public:
 
 protected:
     // 初始化相关常量
-
+    float Gimbal_Head_Angle = 140.86f * PI / 180.0f;
     // 常量
     //  yaw轴最小值
     float Min_Yaw_Angle = -180.0f;
@@ -285,7 +285,10 @@ Class_Gimbal::Get_Gimbal_Control_Type()
 {
     return (Gimbal_Control_Type);
 }
-
+float Class_Gimbal::Get_Gimbal_Head_Angle()
+{
+    return (Gimbal_Head_Angle);
+}
 /**
  * @brief 获取yaw轴角度
  *
